@@ -9,6 +9,7 @@ Soll Funktionen:
 - Auf dem Display wird der Verarbeitungszustand angezeigt (Chip gelesen, Chip überprüfen, …)
 - Der ESP(1) gibt eine Webseite aus, die den Zustand der Entriegelung angibt.
 - Kommunikation über TCP/IP Protokoll
+
 Optionale Funktionen:
 - WLAN-Konfiguration via Access-Point (Freischaltung durch Taster)
 - Die WLAN-Kommunikation verschlüsseln
