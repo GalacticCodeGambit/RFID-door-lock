@@ -5,6 +5,7 @@ entscheidet, ob dieser Code richtig definiert/eingespeichert ist oder nicht. Bei
 wird auf beiden Displays "Entriegelt" angezeigt und die LED (ESP(2)) wird eingeschaltet. Die LED
 symbolisiert die Entriegelung einer Tür/eines Türschlosses. Der entriegelte Zustand bleibt für einen
 kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt über WLAN.
+
 Soll Funktionen:
 - Auf dem Display wird der Verarbeitungszustand angezeigt (Chip gelesen, Chip überprüfen, …)
 - Der ESP(1) gibt eine Webseite aus, die den Zustand der Entriegelung angibt.
