@@ -77,9 +77,9 @@ void loop() {
 
     Serial.println("Reading from Data Block...");
     // mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   //Test Dump alle Daten
-    //Read(blockNum, readData);
+    Read(blockNum, blockData);
 
-    //--------------------//
+    /*/--------------------//
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, blockNum, &key, &(mfrc522.uid));
 
     if (status != MFRC522::STATUS_OK) {
@@ -101,22 +101,23 @@ void loop() {
       Serial.println("Block was read successfully");
       delay(d);
     }
-    //--------------------//
+    *//--------------------//
     if (status == MFRC522::STATUS_OK) {
       Serial.println("Data in Block:");
       Serial.print(" --> ");
-      for (int i = 0; i < 16; i++) {  //uint8_t
+      Serial.print(blockData[16]);
+      /*for (int i = 0; i < 16; i++) {  //uint8_t
         Serial.print(readData[i]);
-      }
+      */}
     } else {
       Serial.print("Reading failed");
     }
     Serial.print("\n");
 
-    
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-    
+
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+
 
     delay(5000);  // Danach 5 Sekunden pausieren um mehrfaches Lesen / Ausführen zu verhindern
     Serial.println("Bereit zum Lesen...\n");
