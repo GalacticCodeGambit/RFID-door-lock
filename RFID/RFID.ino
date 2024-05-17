@@ -77,38 +77,39 @@ void loop() {
 
     Serial.println("Reading from Data Block...");
     // mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   //Test Dump alle Daten
-    Read(blockNum, blockData);
+    //Read(blockNum, readData);
+    /*
+        //--------------------//
+        status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, blockNum, &key, &(mfrc522.uid));
 
-    /*/--------------------//
-    status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, blockNum, &key, &(mfrc522.uid));
-
-    if (status != MFRC522::STATUS_OK) {
-      Serial.print("Authentication failed for Read: ");
-      delay(d);
-      Serial.println(mfrc522.GetStatusCodeName(status));
-      return;
-    } else {
-      Serial.println("Authentication success");
-      delay(d);
-    }
-    status = mfrc522.MIFARE_Read(blockNum, readData, &bufferLen);
-    if (status != MFRC522::STATUS_OK) {
-      Serial.print("Reading failed: ");
-      delay(d);
-      Serial.println(mfrc522.GetStatusCodeName(status));
-      return;
-    } else {
-      Serial.println("Block was read successfully");
-      delay(d);
-    }
-    *//--------------------//
+        if (status != MFRC522::STATUS_OK) {
+          Serial.print("Authentication failed for Read: ");
+          delay(d);
+          Serial.println(mfrc522.GetStatusCodeName(status));
+          return;
+        } else {
+          Serial.println("Authentication success");
+          delay(d);
+        }
+        status = mfrc522.MIFARE_Read(blockNum, readData, &bufferLen);
+        if (status != MFRC522::STATUS_OK) {
+          Serial.print("Reading failed: ");
+          delay(d);
+          Serial.println(mfrc522.GetStatusCodeName(status));
+          return;
+        } else {
+          Serial.println("Block was read successfully");
+          delay(d);
+        }
+        //--------------------//
+    */
     if (status == MFRC522::STATUS_OK) {
       Serial.println("Data in Block:");
       Serial.print(" --> ");
-      Serial.print(blockData[16]);
-      /*for (int i = 0; i < 16; i++) {  //uint8_t
+      for (int i = 0; i < 16; i++) {  //uint8_t
+
         Serial.print(readData[i]);
-      */}
+      }
     } else {
       Serial.print("Reading failed");
     }
