@@ -9,7 +9,6 @@ long chipUID;
 MFRC522 mfrc522(SS_PIN, RST_PIN); // MFRC522-Instanz erstellen
 MFRC522::MIFARE_Key key;
 
-byte d = 100;
 byte blockNum = 2;      // Nummer des auszulesenden Datenblockes
 byte readData[18];
 byte size = sizeof(readData);
@@ -42,22 +41,18 @@ void Read(int blockNum, byte readData[]) {
 
   if (status != MFRC522::STATUS_OK) {
     Serial.print("Authentication failed for Read: ");
-    delay(d);
     Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   } else {
     Serial.println("Authentication success");
-    delay(d);
   }
   status = mfrc522.MIFARE_Read(blockNum, readData, &size);
   if (status != MFRC522::STATUS_OK) {
     Serial.print("Reading failed: ");
-    delay(d);
-    Serial.print(mfrc522.GetStatusCodeName(status));
+    Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   } else {
     Serial.println("Block was read successfully");
-    delay(d);
   }
 }
 
@@ -84,8 +79,8 @@ void loop() {
     Read(blockNum, readData);
     if (status == MFRC522::STATUS_OK) {
       Serial.println("Data in Block " + String(blockNum) + ":");
-      Serial.print(" --> ");
-      for (byte i = 0; i < 16; i++) {  
+      Serial.print(" -->");
+      for (byte i = 0; i < 16; i++) {
         Serial.print(readData[i] < 10 & 0x10 ? " 0" : " ");
         Serial.print(readData[i], HEX);           // Umwandeln in Hexadezimal
       }
