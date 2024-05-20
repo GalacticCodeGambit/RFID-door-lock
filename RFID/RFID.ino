@@ -9,17 +9,18 @@ long chipUID;
 MFRC522 mfrc522(SS_PIN, RST_PIN); // MFRC522-Instanz erstellen
 MFRC522::MIFARE_Key key;
 
-int d = 300;
-int blockNum = 2;
+int d = 100;
+int blockNum = 2;      //Nummer des auszulesenden Datenblockes
 byte bufferLen = 18;
 byte readData[18];
+String Data;           //ausgelesene Daten
 
 MFRC522::StatusCode status;
 
 
 void setup() {
   Serial.begin(9600);
-  SPI.begin();  // SPI-Bus initialisieren
+  SPI.begin();         // SPI-Bus initialisieren
   mfrc522.PCD_Init();  //Startet RFID Sensor
   delay(4);
 
@@ -46,7 +47,7 @@ void Read(int blockNum, byte readData[]) {
   if (status != MFRC522::STATUS_OK) {
     Serial.print("Reading failed: ");
     delay(d);
-    Serial.println(mfrc522.GetStatusCodeName(status));
+    Serial.print(mfrc522.GetStatusCodeName(status));
     return;
   } else {
     Serial.println("Block was read successfully");
@@ -56,8 +57,7 @@ void Read(int blockNum, byte readData[]) {
 
 
 void loop() {
-
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF; //Key festleg
   // Sobald ein Chip aufgelegt wird startet diese Abfrage
   if (mfrc522.PICC_IsNewCardPresent()) {
     chipUID = 0; // CardID resetten
@@ -72,48 +72,26 @@ void loop() {
     Serial.print("RFID-Chip UID: "); //Card UID
     Serial.print(chipUID);  // UID ausgeben
     Serial.print("  |  PICC type: ");
-    MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Modell des RFID Senors
+    MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Modell der RFID-Karte
     Serial.println(mfrc522.PICC_GetTypeName(piccType));
 
     Serial.println("Reading from Data Block...");
-    // mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   //Test Dump alle Daten
-    //Read(blockNum, readData);
-    /*
-        //--------------------//
-        status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, blockNum, &key, &(mfrc522.uid));
+    //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   //Test Dump alle Daten auf RFID-Karte
+    Read(blockNum, readData);
 
-        if (status != MFRC522::STATUS_OK) {
-          Serial.print("Authentication failed for Read: ");
-          delay(d);
-          Serial.println(mfrc522.GetStatusCodeName(status));
-          return;
-        } else {
-          Serial.println("Authentication success");
-          delay(d);
-        }
-        status = mfrc522.MIFARE_Read(blockNum, readData, &bufferLen);
-        if (status != MFRC522::STATUS_OK) {
-          Serial.print("Reading failed: ");
-          delay(d);
-          Serial.println(mfrc522.GetStatusCodeName(status));
-          return;
-        } else {
-          Serial.println("Block was read successfully");
-          delay(d);
-        }
-        //--------------------//
-    */
     if (status == MFRC522::STATUS_OK) {
-      Serial.println("Data in Block:");
+      Serial.println("Data in Block " + String(blockNum) + ":");
       Serial.print(" --> ");
       for (int i = 0; i < 16; i++) {  //uint8_t
-
-        Serial.print(readData[i]);
+        Serial.print(readData[i] < 10 & 0x10 ? " 0" : " ");
+        Serial.print(readData[i], HEX); //Umwandeln in Hex
+        Data = Data + String(readData[i], HEX);     //Ausgelesene Daten im Block
       }
-    } else {
-      Serial.print("Reading failed");
     }
     Serial.print("\n");
+
+    //Test
+    Serial.println(Data);
 
 
     mfrc522.PICC_HaltA();
