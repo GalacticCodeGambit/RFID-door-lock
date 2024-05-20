@@ -87,7 +87,6 @@ void loop() {
       Serial.println();
 
       //Checkt auf richtige Daten auf Karte
-      Serial.println(F("Checkt Karte..."));
       byte count = 0;
       for (byte i = 0; i < 16; i++) {
         // Vergleicht readData mit keyData
