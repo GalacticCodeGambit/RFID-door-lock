@@ -53,6 +53,28 @@ void Read(int blockNum, byte readData[]) {
     return;
   } else {
     Serial.println("Block was read successfully");
+
+
+    Serial.println("Data in Block " + String(blockNum) + ":");
+    Serial.print(" -->");
+    for (byte i = 0; i < 16; i++) {
+      Serial.print(readData[i] < 10 & 0x10 ? " 0" : " ");
+      Serial.print(readData[i], HEX);           // Umwandeln in Hexadezimal
+    }
+    Serial.println();
+
+    //Checkt auf richtige Daten auf Karte
+    byte count = 0;
+    for (byte i = 0; i < 16; i++) {
+      // Vergleicht readData mit keyData
+      if (readData[i] == keyData[i])
+        count++;
+    }
+    if (count == 16) {
+      Serial.println(F("Entriegelt :-)"));
+    } else {
+      Serial.println(F("Falsche RFID-Karte :-("));
+    }
   }
 }
 
@@ -77,31 +99,7 @@ void loop() {
 
     Serial.println("Reading from Data Block...");
     Read(blockNum, readData);
-    if (status == MFRC522::STATUS_OK) {
-      Serial.println("Data in Block " + String(blockNum) + ":");
-      Serial.print(" -->");
-      for (byte i = 0; i < 16; i++) {
-        Serial.print(readData[i] < 10 & 0x10 ? " 0" : " ");
-        Serial.print(readData[i], HEX);           // Umwandeln in Hexadezimal
-      }
-      Serial.println();
-
-      //Checkt auf richtige Daten auf Karte
-      byte count = 0;
-      for (byte i = 0; i < 16; i++) {
-        // Vergleicht readData mit keyData
-        if (readData[i] == keyData[i])
-          count++;
-      }
-      if (count == 16) {
-        Serial.println(F("Entriegelt :-)"));
-      } else {
-        Serial.println(F("Falsche RFID-Karte :-("));
-      }
-      Serial.println();
-    } else {
-      Serial.println();
-    }
+    Serial.println();
 
     //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test Dump alle Daten auf RFID-Karte
     mfrc522.PICC_HaltA();
