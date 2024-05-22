@@ -14,17 +14,17 @@ byte readData[18];
 byte size = sizeof(readData);
 
 byte keyData[16]    = {
-  0x20, 0x20, 0x20, 0x20, //  1,  2,   3,  4,
-  0x20, 0x20, 0x20, 0x20, //  5,  6,   7,  8,
-  0x20, 0x20, 0x20, 0x20, //  9, 10, 255, 11,
-  0x20, 0x20, 0xfe, 0x3f  // 12, 13, 14, 15
+  0x20, 0x20, 0x20, 0x20, //
+  0x20, 0x20, 0x20, 0x20, //
+  0x20, 0x20, 0x20, 0x20, //
+  0x20, 0x20, 0xfe, 0x3f  //
 };
 
 MFRC522::StatusCode status;
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   SPI.begin();         // SPI-Bus initialisieren
   mfrc522.PCD_Init();  // Startet RFID Sensor
   delay(4);
@@ -105,7 +105,15 @@ void loop() {
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
 
-    delay(5000);   // Danach 5 Sekunden pausieren um mehrfaches Lesen / Ausführen zu verhindern
+    // Danach 3 Sekunden pausieren um mehrfaches Lesen / Ausführen zu verhindern
+    byte a = 3;
+    byte b = 0;
+    while (a > b) {
+      Serial.println("Bereit in: "+String(a)+"s");
+      a--;
+      delay(1000);
+    }
     Serial.println("Bereit zum Lesen...\n");
+
   }
 }
