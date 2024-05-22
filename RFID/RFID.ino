@@ -99,6 +99,8 @@ void loop() {
         Serial.println(F("Falsche RFID-Karte :-("));
       }
       Serial.println();
+    } else {
+      Serial.println();
     }
 
     //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test Dump alle Daten auf RFID-Karte
@@ -107,9 +109,8 @@ void loop() {
 
     // Danach 3 Sekunden pausieren um mehrfaches Lesen / Ausführen zu verhindern
     byte a = 3;
-    byte b = 0;
-    while (a > b) {
-      Serial.println("Bereit in: "+String(a)+"s");
+    while (a > 0) {
+      Serial.println("Bereit in: " + String(a) + "s");
       a--;
       delay(1000);
     }
