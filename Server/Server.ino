@@ -12,7 +12,7 @@ char pass[] = "lol123456789";             // password of your home WiFi
 WiFiServer server(80);                    
 
 IPAddress ip(192, 168, 137, 80);          // IP address of the server
-IPAddress gateway(0,0,0,0);         // gateway of your network
+IPAddress gateway(0,0,0,0);               // gateway of your network
 IPAddress subnet(255,255,255,0);          // subnet mask of your network
 
 void setup() {
@@ -39,10 +39,10 @@ void loop () {
   if (client) {
     if (client.connected()) {
       Serial.println(".");
-      String request = client.readStringUntil('\r');      // receives the message from the client
+      String request = client.readStringUntil(';');      // receives the message from the client
       Serial.print("From client: "); Serial.println(request);
       client.flush();
-      client.println("Hi client! No, I am listening.\r"); // sends the answer to the client
+      client.println("Hi client! No, I am listening.;"); // sends the answer to the client
     }
     client.stop();                                        // tarminates the connection with the client
   }
