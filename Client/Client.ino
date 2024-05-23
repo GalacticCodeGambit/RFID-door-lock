@@ -17,6 +17,7 @@ WiFiClient client;
 void setup() {
   Serial.begin(115200);               // only for debug
   WiFi.begin(ssid, pass);             // connects to the WiFi router
+  Serial.println();
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
@@ -33,8 +34,8 @@ void setup() {
 void loop () {
   client.connect(server, 80);                          // Connection to the server
   Serial.println(".");
-  client.println("Hello server! Are you sleeping?;"); // sends the message to the server
-  String answer = client.readStringUntil(';');        // receives the answer from the sever
+  client.println("Hello server! Are you sleeping?\r"); // sends the message to the server
+  String answer = client.readStringUntil('\r');        // receives the answer from the sever
   Serial.println("from server: " + answer);
   client.flush();
   delay(2000);                                         // client will trigger the communication after two seconds
