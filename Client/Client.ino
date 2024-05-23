@@ -6,7 +6,6 @@
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 
-byte ledPin = 2;
 char ssid[] = "lol";                  // SSID of your home WiFi
 char pass[] = "lol123456789";         // password of your home WiFi
 
@@ -29,17 +28,14 @@ void setup() {
   Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
   Serial.print("SSID: "); Serial.println(WiFi.SSID());
   Serial.print("Signal: "); Serial.println(WiFi.RSSI());//*/
-  pinMode(ledPin, OUTPUT);
 }
 
 void loop () {
-  client.connect(server, 80);   // Connection to the server
-  digitalWrite(ledPin, LOW);    // to show the communication only (inverted logic)
+  client.connect(server, 80);                          // Connection to the server
   Serial.println(".");
-  client.println("Hello server! Are you sleeping?\r");  // sends the message to the server
-  String answer = client.readStringUntil('\r');   // receives the answer from the sever
+  client.println("Hello server! Are you sleeping?\r"); // sends the message to the server
+  String answer = client.readStringUntil('\r');        // receives the answer from the sever
   Serial.println("from server: " + answer);
   client.flush();
-  digitalWrite(ledPin, HIGH);
-  delay(2000);                  // client will trigger the communication after two seconds
+  delay(2000);                                         // client will trigger the communication after two seconds
 }
