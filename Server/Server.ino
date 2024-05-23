@@ -14,9 +14,9 @@ WiFiClient clients[5];                    // Array für bis zu 5 Clients
 String messages[10];                      // Warteschlange für bis zu 10 Nachrichten
 int messageCount = 0;
 
-IPAddress ip(192, 168, 137, 80);       // IP address of the server
-IPAddress gateway(0, 0, 0, 0);         // gateway of your network
-IPAddress subnet(255, 255, 255, 0);    // subnet mask of your network
+IPAddress ip(192, 168, 137, 80);          // IP address of the server
+IPAddress gateway(0, 0, 0, 0);            // gateway of your network
+IPAddress subnet(255, 255, 255, 0);       // subnet mask of your network
 
 void setup() {
   Serial.begin(115200);                   // only for debug
