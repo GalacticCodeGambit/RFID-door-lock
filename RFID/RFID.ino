@@ -2,7 +2,7 @@
 #include <MFRC522.h>
 
 #define SS_PIN  15     // Pin: D8  15
-#define RST_PIN  0     // Pin: D3  0
+#define RST_PIN  2     // Pin: D4  2
 
 long chipUID;
 
