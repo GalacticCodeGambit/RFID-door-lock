@@ -3,7 +3,7 @@
 
 char ssid[] = "lol";                  // SSID of your home WiFi
 char pass[] = "lol123456789";         // password of your home WiFi
-
+String LEDstatus = "high";
 //unsigned long askTimer = 0;
 
 unsigned long lastConnectionAttempt = 0;
@@ -38,17 +38,14 @@ void loop() {
       reconnectToServer();
     }
   } else {
-<<<<<<< Updated upstream
-    // Nachricht an den Server senden
-    client.println("Hello server! Are you sleeping?\r");
-=======
->>>>>>> Stashed changes
-
-    // Antwort vom Server empfangen
+    // Nachricht vom Server empfangen
     if (client.available()) {
       String request = client.readStringUntil('\r');
-      Serial.println("Antwort vom Server: " + request);
+      Serial.println("Nachricht vom Server: " + request);
+      LEDstatus = request;
     }
+    // Antwort an den Server senden
+    client.print('Hi server! LED ist ' + LEDstatus + '\r');
   }
 
   // Kleine Pause für Stabilität
