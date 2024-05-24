@@ -1,17 +1,15 @@
-/*  Connects to the home WiFi network
- *  Asks some network parameters
- *  Sends and receives message from the server in every 2 seconds
- *  Communicates: wifi_server_01.ino
- */ 
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 
 char ssid[] = "lol";                  // SSID of your home WiFi
 char pass[] = "lol123456789";         // password of your home WiFi
 
-unsigned long askTimer = 0;
+//unsigned long askTimer = 0;
 
-IPAddress server(192,168,137,80);     // the fix IP address of the server
+unsigned long lastConnectionAttempt = 0;
+const unsigned long connectionAttemptInterval = 5000;  // Versuchsintervall für die Verbindung (in Millisekunden)
+
+IPAddress server(192, 168, 137, 80);  // the fix IP address of the server
 WiFiClient client;
 
 void setup() {
@@ -23,20 +21,52 @@ void setup() {
     delay(500);
   }
   Serial.println("Connected to wifi");
-  Serial.print("Status: "); Serial.println(WiFi.status());    // Network parameters
+/*  Serial.print("Status: "); Serial.println(WiFi.status());    // Network parameters
   Serial.print("IP: ");     Serial.println(WiFi.localIP());
   Serial.print("Subnet: "); Serial.println(WiFi.subnetMask());
   Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
   Serial.print("SSID: "); Serial.println(WiFi.SSID());
   Serial.print("Signal: "); Serial.println(WiFi.RSSI());//*/
+  // Verbindung zum Server herstellen
+  reconnectToServer();
 }
 
-void loop () {
-  client.connect(server, 80);                          // Connection to the server
-  Serial.println(".");
-  client.println("Hello server! Are you sleeping?\r"); // sends the message to the server
-  String answer = client.readStringUntil('\r');        // receives the answer from the sever
-  Serial.println("from server: " + answer);
-  client.flush();
-  delay(2000);                                         // client will trigger the communication after two seconds
+void loop() {
+  if (!client.connected()) {
+    // Wenn die Verbindung zum Server unterbrochen ist, versuchen Sie, sie wiederherzustellen
+    if (millis() - lastConnectionAttempt >= connectionAttemptInterval) {
+      reconnectToServer();
+    }
+  } else {
+    // Nachricht an den Server senden
+    client.println("Hello server! Are you sleeping?\r");
+
+    // Antwort vom Server empfangen
+    if (client.available()) {
+      String answer = client.readStringUntil('\r');
+      Serial.println("Antwort vom Server: " + answer);
+    }
+  }
+
+  // Kleine Pause für Stabilität
+  delay(1000);
+}
+
+void reconnectToServer() {
+  Serial.println("Versuche, die Verbindung zum Server wiederherzustellen...");
+
+  // Wenn eine vorhandene Verbindung vorhanden ist, beenden Sie sie
+  if (client.connected()) {
+    client.stop();
+  }
+
+  // Verbindung zum Server herstellen
+  if (client.connect(server, 80)) {
+    Serial.println("Verbunden mit dem Server.");
+  } else {
+    Serial.println("Verbindung zum Server fehlgeschlagen.");
+  }
+
+  // Aktualisieren Sie den Zeitstempel des letzten Verbindungsversuchs
+  lastConnectionAttempt = millis();
 }

@@ -1,9 +1,3 @@
-/*  Connects to the home WiFi network
-    Asks some network parameters
-    Starts WiFi server with fix IP and listens
-    Receives and sends messages to the client
-    Communicates: wifi_client_01.ino
-*/
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 
@@ -28,8 +22,8 @@ void setup() {
     delay(500);
   }
   server.begin();                         // starts the server
-  Serial.println("Connected to wifi\nServer started");
-  Serial.print("Status: "); Serial.println(WiFi.status());  // some parameters from the network
+  Serial.println("\nConnected to wifi\nServer started");
+/*  Serial.print("Status: "); Serial.println(WiFi.status());  // some parameters from the network
   Serial.print("IP: ");     Serial.println(WiFi.localIP());
   Serial.print("Subnet: "); Serial.println(WiFi.subnetMask());
   Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
