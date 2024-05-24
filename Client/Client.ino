@@ -39,7 +39,7 @@ void loop() {
     }
   } else {
     // Nachricht an den Server senden
-    client.println("Hello server! Are you sleeping?\r");
+    client.print("Hello server! Are you sleeping?\r");
 
     // Antwort vom Server empfangen
     if (client.available()) {

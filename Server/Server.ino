@@ -67,27 +67,12 @@ void loop () {
   }
 
   // Nachrichten aus der Warteschlange an alle Clients senden
-  for (int m = 0; m < messageCount; m++) {
     for (int j = 0; j < 5; j++) {
       if (clients[j] && clients[j].connected()) {
-        clients[j].println("Nachricht vom Server: " + messages[m]);
+        clients[j].print("Hi client! No, I am listening.\r");
       }
     }
-  }
 
   // Warteschlange leeren
   messageCount = 0;
 }
-
-/*
-  WiFiClient client = server.available();
-  if (client) {
-  if (client.connected()) {
-    Serial.println(".");
-    String request = client.readStringUntil('\r');      // receives the message from the client
-    Serial.print("From client: "); Serial.println(request);
-    client.flush();
-    client.println("Hi client! No, I am listening.\r"); // sends the answer to the client
-  }
-  client.stop();                                        // tarminates the connection with the client
-  }*/
