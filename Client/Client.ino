@@ -21,12 +21,12 @@ void setup() {
     delay(500);
   }
   Serial.println("Connected to wifi");
-/*  Serial.print("Status: "); Serial.println(WiFi.status());    // Network parameters
-  Serial.print("IP: ");     Serial.println(WiFi.localIP());
-  Serial.print("Subnet: "); Serial.println(WiFi.subnetMask());
-  Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
-  Serial.print("SSID: "); Serial.println(WiFi.SSID());
-  Serial.print("Signal: "); Serial.println(WiFi.RSSI());//*/
+  /*  Serial.print("Status: "); Serial.println(WiFi.status());    // Network parameters
+    Serial.print("IP: ");     Serial.println(WiFi.localIP());
+    Serial.print("Subnet: "); Serial.println(WiFi.subnetMask());
+    Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
+    Serial.print("SSID: "); Serial.println(WiFi.SSID());
+    Serial.print("Signal: "); Serial.println(WiFi.RSSI());//*/
   // Verbindung zum Server herstellen
   reconnectToServer();
 }
@@ -38,13 +38,16 @@ void loop() {
       reconnectToServer();
     }
   } else {
+<<<<<<< Updated upstream
     // Nachricht an den Server senden
     client.println("Hello server! Are you sleeping?\r");
+=======
+>>>>>>> Stashed changes
 
     // Antwort vom Server empfangen
     if (client.available()) {
-      String answer = client.readStringUntil('\r');
-      Serial.println("Antwort vom Server: " + answer);
+      String request = client.readStringUntil('\r');
+      Serial.println("Antwort vom Server: " + request);
     }
   }
 
@@ -54,19 +57,16 @@ void loop() {
 
 void reconnectToServer() {
   Serial.println("Versuche, die Verbindung zum Server wiederherzustellen...");
-
   // Wenn eine vorhandene Verbindung vorhanden ist, beenden Sie sie
   if (client.connected()) {
     client.stop();
   }
-
   // Verbindung zum Server herstellen
   if (client.connect(server, 80)) {
     Serial.println("Verbunden mit dem Server.");
   } else {
     Serial.println("Verbindung zum Server fehlgeschlagen.");
   }
-
   // Aktualisieren Sie den Zeitstempel des letzten Verbindungsversuchs
   lastConnectionAttempt = millis();
 }

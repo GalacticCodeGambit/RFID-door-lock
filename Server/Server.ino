@@ -23,13 +23,13 @@ void setup() {
   }
   server.begin();                         // starts the server
   Serial.println("\nConnected to wifi\nServer started");
-/*  Serial.print("Status: "); Serial.println(WiFi.status());  // some parameters from the network
-  Serial.print("IP: ");     Serial.println(WiFi.localIP());
-  Serial.print("Subnet: "); Serial.println(WiFi.subnetMask());
-  Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
-  Serial.print("SSID: "); Serial.println(WiFi.SSID());
-  Serial.print("Signal: "); Serial.println(WiFi.RSSI());
-  Serial.print("Networks: "); Serial.println(WiFi.scanNetworks());//*/
+  /*  Serial.print("Status: "); Serial.println(WiFi.status());  // some parameters from the network
+    Serial.print("IP: ");     Serial.println(WiFi.localIP());
+    Serial.print("Subnet: "); Serial.println(WiFi.subnetMask());
+    Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
+    Serial.print("SSID: "); Serial.println(WiFi.SSID());
+    Serial.print("Signal: "); Serial.println(WiFi.RSSI());
+    Serial.print("Networks: "); Serial.println(WiFi.scanNetworks());//*/
 }
 
 void loop () {
@@ -58,20 +58,26 @@ void loop () {
         Serial.println(request);
         clients[i].flush();
 
-        // Nachricht zur Warteschlange hinzufügen
-        if (messageCount < 10) {
-          messages[messageCount++] = request;
-        }
+        // Nachricht zur messages hinzufügen
+        messages[i] = request;
+        messageCount++;
       }
     }
   }
 
+<<<<<<< Updated upstream
   // Nachrichten aus der Warteschlange an alle Clients senden
   for (int m = 0; m < messageCount; m++) {
     for (int j = 0; j < 5; j++) {
       if (clients[j] && clients[j].connected()) {
         clients[j].println("Nachricht vom Server: " + messages[m]);
       }
+=======
+  // Nachrichten an alle Clients senden
+  for (int j = 0; j < 5; j++) {
+    if (clients[j] && clients[j].connected()) {
+      clients[j].print("Hi client! No, I am listening." + "\r");
+>>>>>>> Stashed changes
     }
   }
 
