@@ -9,16 +9,17 @@ long chipUID;
 MFRC522 mfrc522(SS_PIN, RST_PIN); // MFRC522-Instanz erstellen
 MFRC522::MIFARE_Key key;
 
-byte blockNum = 2;      // Nummer des auszulesenden Datenblockes
+byte myKey[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; // Festlegen des Authentifizierungs-Schluessels
+byte keyData[16] = {      // Festlegen des Daten-Schluessels
+  0x20, 0x20, 0x20, 0x20,
+  0x20, 0x20, 0x20, 0x20,
+  0x20, 0x20, 0x20, 0x20,
+  0x20, 0x20, 0xfe, 0x3f
+};
+
+byte blockNum = 2;      // Nummer des auszulesenden Datenblockes für den Daten-Schluessel
 byte readData[18];
 byte size = sizeof(readData);
-
-byte keyData[16]    = {
-  0x20, 0x20, 0x20, 0x20, //
-  0x20, 0x20, 0x20, 0x20, //
-  0x20, 0x20, 0x20, 0x20, //
-  0x20, 0x20, 0xfe, 0x3f  //
-};
 
 MFRC522::StatusCode status;
 
@@ -28,10 +29,10 @@ void setup() {
   SPI.begin();         // SPI-Bus initialisieren
   mfrc522.PCD_Init();  // Startet RFID Sensor
   delay(4);
+  for (byte i = 0; i < 6; i++)key.keyByte[i] = myKey[i]; //Key festlegen
+  Serial.println();
 
-  Serial.println("");
-
-  mfrc522.PCD_DumpVersionToSerial();  // Details vom PCI - MFRC522 RFID READER/WRITER ausgeben
+  mfrc522.PCD_DumpVersionToSerial();  // Details vom PCI-MFRC522 RFID-Reader/Writer ausgeben
   Serial.println("RFID-Reader bereit zum lesen...");
 }
 
@@ -80,7 +81,6 @@ void Read(int blockNum, byte readData[]) {
 
 
 void loop() {
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF; //Key festlegen
   // Sobald ein Chip aufgelegt wird startet diese Abfrage
   if (mfrc522.PICC_IsNewCardPresent()) {
     mfrc522.PICC_ReadCardSerial();
