@@ -14,7 +14,8 @@ WiFiClient client;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(LEDpin, OUTPUT);            // Setze den LED-Pin als Ausgang
+  pinMode(LEDpin, OUTPUT);
+
   WiFi.begin(ssid, pass);             // connects to the WiFi router
   Serial.println();
   while (WiFi.status() != WL_CONNECTED) {
@@ -22,8 +23,7 @@ void setup() {
     delay(500);
   }
   Serial.println("Connected to wifi");
-  // Verbindung zum Server herstellen
-  reconnectToServer();
+  reconnectToServer();                // Verbindung zum Server herstellen
 }
 
 void loop() {
@@ -32,34 +32,16 @@ void loop() {
       reconnectToServer();
     }
   } else {
-    // Nachricht vom Server empfangen
-    if (client.available()) {
-      String request = client.readStringUntil('\r');
-      if (request.length() > 0) {                       // Nur wenn eine tatsächliche Nachricht empfangen wurde
-        Serial.println("Nachricht vom Server: " + request);
-        if (request == "LED high") {
-          digitalWrite(LEDpin, HIGH);
-          LEDstatus = "an";
-          client.print("LED ist " + LEDstatus + '\r');  // Antwort an Server senden
-          request = "";                                 // Request leeren
-        } else if (request == "LED low") {
-          digitalWrite(LEDpin, LOW);
-          LEDstatus = "aus";
-          client.print("LED ist " + LEDstatus + '\r');  // Antwort an Server senden
-          request = "";                                 // Request leeren
-        }
-      }
-    }
+    handleServerCommunication();
   }
-  delay(1000);                                          // Kleine Pause für Stabilität
+  delay(1000);                                         // Kleine Pause für Stabilität
 }
 
 void reconnectToServer() {
   Serial.println("Versuche, die Verbindung zum Server wiederherzustellen...");
-  // Wenn eine vorhandene Verbindung vorhanden ist, beende diese
-  if (client.connected()) {
+/*  if (client.connected()) { //Zum Testen entfernen 
     client.stop();
-  }
+  }*/
   // Verbindung zum Server herstellen
   if (client.connect(server, 80)) {
     Serial.println("Verbunden mit dem Server.");
@@ -67,4 +49,23 @@ void reconnectToServer() {
     Serial.println("Verbindung zum Server fehlgeschlagen.");
   }
   lastConnectionAttempt = millis();    // Aktualisieren des Zeitstempel des letzten Verbindungsversuchs
+}
+
+void handleServerCommunication() {
+  if (client.available()) {                          // Nachricht vom Server empfangen
+    String request = client.readStringUntil('\r');
+    if (request.length() > 0) {                      // Nur wenn eine tatsächliche Nachricht empfangen wurde
+      Serial.println("Nachricht vom Server: " + request);
+      if (request == "LED high") {
+        digitalWrite(LEDpin, HIGH);
+        LEDstatus = "an";
+        client.print("LED ist " + LEDstatus + '\r'); // Antwort an Server senden
+      } else if (request == "LED low") {
+        digitalWrite(LEDpin, LOW);
+        LEDstatus = "aus";
+        client.print("LED ist " + LEDstatus + '\r'); // Antwort an Server senden
+      }
+      request = "";                                  // Request leeren
+    }
+  }
 }

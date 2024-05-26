@@ -38,7 +38,7 @@ void loop () {
   // Accept new clients
   if (server.hasClient()) {
     for (int i = 0; i < 5; i++) {
-      // Freier Slot gefunden
+      // Freier Slot finden
       if (!clients[i] || !clients[i].connected()) {
         if (clients[i]) clients[i].stop();
         clients[i] = server.available();
@@ -52,7 +52,7 @@ void loop () {
   // If sendLedHigh is true, send "LED high" to all connected clients
   if (sendLedHigh) {
     sendLedHighToClients();
-    sendLedHigh = false; // Reset the variable to avoid resending immediately
+    sendLedHigh = false;   // Reset the variable to avoid resending immediately
     waitingForResponse = true;
     lastSendTime = millis();
     expectedResponse = "LED ist an";
@@ -61,7 +61,7 @@ void loop () {
   // If sendLedLow is true, send "LED low" to all connected clients
   if (sendLedLow) {
     sendLedLowToClients();
-    sendLedLow = false; // Reset the variable to avoid resending immediately
+    sendLedLow = false;    // Reset the variable to avoid resending immediately
     waitingForResponse = true;
     lastSendTime = millis();
     expectedResponse = "LED ist aus";
@@ -96,8 +96,8 @@ void loop () {
     if (allClientsResponded) {
       LEDstatus = (expectedResponse == "LED ist an") ? "high" : "low";
       Serial.println("All clients confirmed LED status");
-      waitingForResponse = false; // Stop waiting for responses
-      resendCount = 0; // Reset resend count after successful responses
+      waitingForResponse = false;   // Stop waiting for responses
+      resendCount = 0;              // Reset resend count after successful responses
     } else if (millis() - lastSendTime >= resendInterval) {
       if (resendCount < maxResendAttempts) {
         Serial.println("Resending LED status to clients...");
