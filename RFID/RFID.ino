@@ -18,17 +18,17 @@ byte keyData[16] = {              // Festlegen des Daten-Schluessels
 const byte keyDataBlockNumber = 2;      // Speicher Ort des Daten-Schluessel im Block
 byte readData[18];
 byte size = sizeof(readData);
+bool rfidReadyMessageDisplayed = false; // Variable to track if the RFID ready message was displayed
 
 
 void setup() {
   Serial.begin(115200);
-  SPI.begin();         
+  SPI.begin();
   mfrc522.PCD_Init();             // Start des RFID Sensor
   delay(4);
   for (byte i = 0; i < 6; i++)key.keyByte[i] = myKey[i]; //Key festlegen
   Serial.println();
   mfrc522.PCD_DumpVersionToSerial();  // Details vom PCI-MFRC522 RFID-Reader/Writer ausgeben
-  Serial.println("RFID-Reader bereit zum lesen...");
 }
 
 
@@ -92,10 +92,14 @@ void readRFIDcard(const byte keyDataBlockNumber, byte readData[]) {
 
 
 void loop() {
+  if (!rfidReadyMessageDisplayed) {
+    Serial.println("RFID-Reader bereit zum lesen...\n");
+    rfidReadyMessageDisplayed = true;
+  }
   // Sobald eine Karte aufgelegt wird startet das Auslesen
   if (mfrc522.PICC_IsNewCardPresent()) {
     readRFIDcard(keyDataBlockNumber, readData);
-
+    rfidReadyMessageDisplayed = false;
     // 3 Sekunden pausieren um mehrfaches Lesen/Ausführen zu verhindern
     for (byte a = 3; a > 0; a--) {
       Serial.println("Bereit in: " + String(a) + "s");
