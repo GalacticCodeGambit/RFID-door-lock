@@ -11,7 +11,7 @@ IPAddress gateway(0, 0, 0, 0);            // gateway of your network
 IPAddress subnet(255, 255, 255, 0);       // subnet mask of your network
 
 void setup() {
-  Serial.begin(115200);                   // only for debug
+  Serial.begin(115200);
   WiFi.config(ip, gateway, subnet);       // forces to use the fix IP
   WiFi.begin(ssid, pass);                 // connects to the WiFi router
   Serial.println();

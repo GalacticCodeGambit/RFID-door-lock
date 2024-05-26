@@ -3,7 +3,7 @@
 
 char ssid[] = "lol";                  // SSID of your home WiFi
 char pass[] = "lol123456789";         // password of your home WiFi
-const byte LEDpin = D4;               
+const byte LEDpin = D4;
 String LEDstatus = "aus";
 
 unsigned long lastConnectionAttempt = 0;
@@ -13,8 +13,8 @@ IPAddress server(192, 168, 137, 80);  // the fix IP address of the server
 WiFiClient client;
 
 void setup() {
+  Serial.begin(115200);
   pinMode(LEDpin, OUTPUT);            // Setze den LED-Pin als Ausgang
-  Serial.begin(115200);               // only for debug
   WiFi.begin(ssid, pass);             // connects to the WiFi router
   Serial.println();
   while (WiFi.status() != WL_CONNECTED) {
@@ -27,7 +27,7 @@ void setup() {
 }
 
 void loop() {
-  if (!client.connected()) {  // Bei Verbindungsverlusst mit Server neu Verbinden 
+  if (!client.connected()) {  // Bei Verbindungsverlusst mit Server neu Verbinden
     if (millis() - lastConnectionAttempt >= connectionAttemptInterval) {
       reconnectToServer();
     }
