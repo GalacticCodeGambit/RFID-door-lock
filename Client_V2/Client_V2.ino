@@ -8,6 +8,8 @@ String LEDstatus = "aus";
 
 unsigned long lastConnectionAttempt = 0;
 const unsigned long connectionAttemptInterval = 5000;  // Versuchsintervall für die Verbindung (in Millisekunden)
+unsigned long lastSetTime = 0;
+const unsigned long resetInterval = 5 * 1000; // Zeit bis LED wieder aus geht
 
 IPAddress server(192, 168, 137, 80);  // the fix IP address of the server
 WiFiClient client;
@@ -27,21 +29,25 @@ void setup() {
 }
 
 void loop() {
-  if (!client.connected()) {  // Bei Verbindungsverlusst mit Server neu Verbinden
+  if (!client.connected()) {         // Bei Verbindungsverlusst mit Server neu Verbinden
     if (millis() - lastConnectionAttempt >= connectionAttemptInterval) {
       reconnectToServer();
     }
   } else {
     handleServerCommunication();
   }
+  if (LEDstatus == "an" && millis() - lastSetTime >= resetInterval) {  // LED nach resetInterval auf Low stellen
+    digitalWrite(LEDpin, LOW);
+    LEDstatus = "aus";
+  }
   delay(1000);                                         // Kleine Pause für Stabilität
 }
 
 void reconnectToServer() {
   Serial.println("Versuche, die Verbindung zum Server wiederherzustellen...");
-/*  if (client.connected()) { //Zum Testen entfernen 
-    client.stop();
-  }*/
+  /*  if (client.connected()) { //Zum Testen entfernen
+      client.stop();
+    }*/
   // Verbindung zum Server herstellen
   if (client.connect(server, 80)) {
     Serial.println("Verbunden mit dem Server.");
@@ -59,6 +65,7 @@ void handleServerCommunication() {
       if (request == "LED high") {
         digitalWrite(LEDpin, HIGH);
         LEDstatus = "an";
+        lastSetTime = millis();
         client.print("LED ist " + LEDstatus + '\r'); // Antwort an Server senden
       } else if (request == "LED low") {
         digitalWrite(LEDpin, LOW);

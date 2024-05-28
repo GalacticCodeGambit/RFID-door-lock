@@ -163,6 +163,7 @@ void loop () {
       }
     }
   }
+  Serial.println(clients[0].remoteIP()); // Client IP Adresse abfrage 
 }
 
 void sendLedHighToClients() {
