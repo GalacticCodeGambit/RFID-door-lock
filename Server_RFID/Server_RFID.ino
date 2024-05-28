@@ -80,10 +80,23 @@ void loop () {
     }
   }
 
+  byte connectedClients = 0;
+  for (byte i = 0; i < 5; i++) {
+    if (clients[i]) {
+      if (clients[i].connected()) {
+        connectedClients++;
+      } else {
+        clients[i].stop();
+      }
+    }
+  }
+  Serial.print("Connected clients: ");
+  Serial.println(connectedClients);
+
 
   if (!rfidReadyMessageDisplayed) {
     Serial.println("RFID-Reader bereit zum lesen...\n");
-    rfidReadyMessageDisplayed = true; 
+    rfidReadyMessageDisplayed = true;
   }
   // Sobald eine Karte aufgelegt wird startet das Auslesen
   if (mfrc522.PICC_IsNewCardPresent()) {
@@ -163,7 +176,7 @@ void loop () {
       }
     }
   }
-  Serial.println(clients[0].remoteIP()); // Client IP Adresse abfrage 
+  Serial.println(clients[0].remoteIP()); // Client IP Adresse abfrage
 }
 
 void sendLedHighToClients() {
