@@ -93,90 +93,89 @@ void loop () {
   Serial.print("Connected clients: ");
   Serial.println(connectedClients);
 
-
-  if (!rfidReadyMessageDisplayed) {
-    Serial.println("RFID-Reader bereit zum lesen...\n");
-    rfidReadyMessageDisplayed = true;
-  }
-  // Sobald eine Karte aufgelegt wird startet das Auslesen
-  if (mfrc522.PICC_IsNewCardPresent()) {
-    readRFIDcard(keyDataBlockNumber, readData);
-    rfidReadyMessageDisplayed = false;
-    /*    // 3 Sekunden pausieren um mehrfaches Lesen/Ausführen zu verhindern
-        for (byte a = 3; a > 0; a--) {
-          Serial.println("Bereit in: " + String(a) + "s");
-          delay(1000);
-        }*/
-  }
+  if (connectedClients != 0) {
+    if (!rfidReadyMessageDisplayed) {
+      Serial.println("RFID-Reader bereit zum lesen...\n");
+      rfidReadyMessageDisplayed = true;
+    }
+    // Sobald eine Karte aufgelegt wird startet das Auslesen
+    if (mfrc522.PICC_IsNewCardPresent()) {
+      readRFIDcard(keyDataBlockNumber, readData);
+      rfidReadyMessageDisplayed = false;
+    }
 
 
-  // If sendLedHigh is true, send "LED high" to all connected clients
-  if (sendLedHigh) {
-    sendLedHighToClients();
-    sendLedHigh = false;   // Reset the variable to avoid resending immediately
-    waitingForResponse = true;
-    lastSendTime = millis();
-    expectedResponse = "LED ist an";
-  }
+    // If sendLedHigh is true, send "LED high" to all connected clients
+    if (sendLedHigh) {
+      sendLedHighToClients();
+      sendLedHigh = false;   // Reset the variable to avoid resending immediately
+      waitingForResponse = true;
+      lastSendTime = millis();
+      expectedResponse = "LED ist an";
+    }
 
-  // If sendLedLow is true, send "LED low" to all connected clients
-  if (sendLedLow) {
-    sendLedLowToClients();
-    sendLedLow = false;    // Reset the variable to avoid resending immediately
-    waitingForResponse = true;
-    lastSendTime = millis();
-    expectedResponse = "LED ist aus";
-  }
+    // If sendLedLow is true, send "LED low" to all connected clients
+    if (sendLedLow) {
+      sendLedLowToClients();
+      sendLedLow = false;    // Reset the variable to avoid resending immediately
+      waitingForResponse = true;
+      lastSendTime = millis();
+      expectedResponse = "LED ist aus";
+    }
 
-  // Process responses from clients
-  if (waitingForResponse) {
-    bool allClientsResponded = true;
-    for (int i = 0; i < 5; i++) {
-      if (clients[i] && clients[i].connected()) {
-        if (clients[i].available()) {
-          String response = clients[i].readStringUntil('\r');
-          Serial.print("Client ");
-          Serial.print(i);
-          Serial.print(" says: ");
-          Serial.println(response);
-          clients[i].flush();
-
-          if (response == expectedResponse) {
+    // Process responses from clients
+    if (waitingForResponse) {
+      bool allClientsResponded = true;
+      for (int i = 0; i < 5; i++) {
+        if (clients[i] && clients[i].connected()) {
+          if (clients[i].available()) {
+            String response = clients[i].readStringUntil('\r');
             Serial.print("Client ");
             Serial.print(i);
-            Serial.println(" confirmed LED status");
+            Serial.print(" says: ");
+            Serial.println(response);
+            clients[i].flush();
+
+            if (response == expectedResponse) {
+              Serial.print("Client ");
+              Serial.print(i);
+              Serial.println(" confirmed LED status");
+            } else {
+              allClientsResponded = false;
+            }
           } else {
             allClientsResponded = false;
           }
-        } else {
-          allClientsResponded = false;
         }
       }
-    }
 
-    if (allClientsResponded) {
-      LEDstatus = (expectedResponse == "LED ist an") ? "high" : "low";
-      Serial.println("All clients confirmed LED status");
-      waitingForResponse = false;   // Stop waiting for responses
-      resendCount = 0;              // Reset resend count after successful responses
-    } else if (millis() - lastSendTime >= resendInterval) {
-      if (resendCount < maxResendAttempts) {
-        Serial.println("Resending LED status to clients...");
-        if (expectedResponse == "LED ist an") {
-          sendLedHighToClients();
+      if (allClientsResponded) {
+        LEDstatus = (expectedResponse == "LED ist an") ? "high" : "low";
+        Serial.println("All clients confirmed LED status");
+        waitingForResponse = false;   // Stop waiting for responses
+        resendCount = 0;              // Reset resend count after successful responses
+      } else if (millis() - lastSendTime >= resendInterval) {
+        if (resendCount < maxResendAttempts) {
+          Serial.println("Resending LED status to clients...");
+          if (expectedResponse == "LED ist an") {
+            sendLedHighToClients();
+          } else {
+            sendLedLowToClients();
+          }
+          lastSendTime = millis();
+          resendCount++;
         } else {
-          sendLedLowToClients();
+          Serial.println("Client antwortet nicht");
+          waitingForResponse = false; // Stop waiting after max attempts
+          resendCount = 0;
         }
-        lastSendTime = millis();
-        resendCount++;
-      } else {
-        Serial.println("Client antwortet nicht");
-        waitingForResponse = false; // Stop waiting after max attempts
-        resendCount = 0;
       }
     }
+  } else {
+    delay(1000);
+    Serial.println("Error no clients connected");
+    Serial.println(connectedClients); // Test
   }
-  Serial.println(clients[0].remoteIP()); // Client IP Adresse abfrage
 }
 
 void sendLedHighToClients() {

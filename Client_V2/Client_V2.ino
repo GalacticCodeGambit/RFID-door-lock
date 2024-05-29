@@ -39,6 +39,7 @@ void loop() {
   if (LEDstatus == "an" && millis() - lastSetTime >= resetInterval) {  // LED nach resetInterval auf Low stellen
     digitalWrite(LEDpin, LOW);
     LEDstatus = "aus";
+    client.print("LED ist aus\r");
   }
   delay(1000);                                         // Kleine Pause für Stabilität
 }
