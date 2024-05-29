@@ -16,7 +16,7 @@ bool sendLedLow = false;                  // Variable to initiate LED low reques
 String LEDstatus = "low";                 // Current status of LED
 
 unsigned long lastSendTime = 0;
-const unsigned long resendInterval = 3000; // Interval for resending message (3 seconds)
+const unsigned long resendInterval = 3000; // Interval for resending message
 int resendCount = 0;
 const int maxResendAttempts = 2;
 bool waitingForResponse = false;
@@ -82,16 +82,13 @@ void loop () {
 
   byte connectedClients = 0;
   for (byte i = 0; i < 5; i++) {
-    if (clients[i]) {
-      if (clients[i].connected()) {
-        connectedClients++;
-      } else {
-        clients[i].stop();
-      }
+    if (clients[i] && clients[i].connected()) {
+      connectedClients++;
+    } else if (clients[i]) {
+      clients[i].stop();
     }
   }
-  Serial.print("Connected clients: ");
-  Serial.println(connectedClients);
+
 
   if (connectedClients != 0) {
     if (!rfidReadyMessageDisplayed) {
@@ -166,6 +163,7 @@ void loop () {
           resendCount++;
         } else {
           Serial.println("Client antwortet nicht");
+          Serial.println();
           waitingForResponse = false; // Stop waiting after max attempts
           resendCount = 0;
         }
@@ -173,6 +171,7 @@ void loop () {
     }
   } else {
     delay(1000);
+    rfidReadyMessageDisplayed = false;
     Serial.println("Error no clients connected");
     Serial.println(connectedClients); // Test
   }
