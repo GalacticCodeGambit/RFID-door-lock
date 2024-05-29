@@ -68,7 +68,7 @@ void setup() {
 void loop () {
   // Accept new clients
   if (server.hasClient()) {
-    for (int i = 0; i < 5; i++) {
+    for (byte i = 0; i < 5; i++) {
       // Freier Slot finden
       if (!clients[i] || !clients[i].connected()) {
         if (clients[i]) clients[i].stop();
@@ -123,7 +123,7 @@ void loop () {
     // Process responses from clients
     if (waitingForResponse) {
       bool allClientsResponded = true;
-      for (int i = 0; i < 5; i++) {
+      for (byte i = 0; i < 5; i++) {
         if (clients[i] && clients[i].connected()) {
           if (clients[i].available()) {
             String response = clients[i].readStringUntil('\r');
@@ -178,7 +178,7 @@ void loop () {
 }
 
 void sendLedHighToClients() {
-  for (int i = 0; i < 5; i++) {
+  for (byte i = 0; i < 5; i++) {
     if (clients[i] && clients[i].connected()) {
       clients[i].print("LED high\r");
     }
@@ -186,7 +186,7 @@ void sendLedHighToClients() {
 }
 
 void sendLedLowToClients() {
-  for (int i = 0; i < 5; i++) {
+  for (byte i = 0; i < 5; i++) {
     if (clients[i] && clients[i].connected()) {
       clients[i].print("LED low\r");
     }
