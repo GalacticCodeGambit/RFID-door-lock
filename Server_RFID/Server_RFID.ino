@@ -4,8 +4,9 @@
 
 char ssid[] = "lol";                      // SSID of your home WiFi
 char pass[] = "lol123456789";             // password of your home WiFi
-WiFiServer server(80);
-WiFiClient clients[5];                    // Array für bis zu 5 Clients
+WiFiServer server(80);                    // Server Port
+const byte maxClientNumber = 5;
+WiFiClient clients[maxClientNumber];
 
 IPAddress ip(192, 168, 137, 80);          // IP address of the server
 IPAddress gateway(0, 0, 0, 0);            // gateway of your network
@@ -42,7 +43,7 @@ const byte keyDataBlockNumber = 2;      // Speicher Ort des Daten-Schluessel im 
 byte readData[18];
 byte size = sizeof(readData);
 bool rfidReadyMessageDisplayed = false; // Variable to track if the RFID ready message was displayed
-
+bool noClientsConnectedPreviously = true; // Variable to track if there were no clients connected previously
 
 void setup() {
   Serial.begin(115200);
@@ -68,27 +69,36 @@ void setup() {
 void loop () {
   // Accept new clients
   if (server.hasClient()) {
-    for (byte i = 0; i < 5; i++) {
+    for (byte i = 0; i < maxClientNumber; i++) {
       // Freier Slot finden
       if (!clients[i] || !clients[i].connected()) {
-        if (clients[i]) clients[i].stop();
+        if (clients[i]) {
+          clients[i].stop();
+        }
         clients[i] = server.available();
         Serial.print("New client connected, ID: ");
         Serial.println(i);
+        if (noClientsConnectedPreviously) {
+          Serial.println("RFID-Reader bereit zum lesen...\n");
+          noClientsConnectedPreviously = false;
+          rfidReadyMessageDisplayed = true; // Prevent duplicate message when new client connects
+        }
         break;
       }
     }
   }
 
+  // Counts the connected clients
   byte connectedClients = 0;
-  for (byte i = 0; i < 5; i++) {
-    if (clients[i] && clients[i].connected()) {
-      connectedClients++;
-    } else if (clients[i]) {
-      clients[i].stop();
+  for (byte i = 0; i < maxClientNumber; i++) {
+    if (clients[i]) {
+      if (clients[i].connected()) {
+        connectedClients++;
+      } else {
+        clients[i].stop();
+      }
     }
   }
-
 
   if (connectedClients != 0) {
     if (!rfidReadyMessageDisplayed) {
@@ -123,7 +133,7 @@ void loop () {
     // Process responses from clients
     if (waitingForResponse) {
       bool allClientsResponded = true;
-      for (byte i = 0; i < 5; i++) {
+      for (byte i = 0; i < maxClientNumber; i++) {
         if (clients[i] && clients[i].connected()) {
           if (clients[i].available()) {
             String response = clients[i].readStringUntil('\r');
@@ -150,7 +160,7 @@ void loop () {
         LEDstatus = (expectedResponse == "LED ist an") ? "high" : "low";
         Serial.println("All clients confirmed LED status");
         waitingForResponse = false;   // Stop waiting for responses
-        resendCount = 0;              // Reset resend count after successful responses
+        resendCount = 0;
       } else if (millis() - lastSendTime >= resendInterval) {
         if (resendCount < maxResendAttempts) {
           Serial.println("Resending LED status to clients...");
@@ -171,14 +181,17 @@ void loop () {
     }
   } else {
     delay(1000);
-    rfidReadyMessageDisplayed = false;
+    if (connectedClients == 0) {
+      noClientsConnectedPreviously = true;
+      rfidReadyMessageDisplayed = false;
+    }
     Serial.println("Error no clients connected");
     Serial.println(connectedClients); // Test
   }
 }
 
 void sendLedHighToClients() {
-  for (byte i = 0; i < 5; i++) {
+  for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i] && clients[i].connected()) {
       clients[i].print("LED high\r");
     }
@@ -186,7 +199,7 @@ void sendLedHighToClients() {
 }
 
 void sendLedLowToClients() {
-  for (byte i = 0; i < 5; i++) {
+  for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i] && clients[i].connected()) {
       clients[i].print("LED low\r");
     }
@@ -202,7 +215,7 @@ void readRFIDcard(const byte keyDataBlockNumber, byte readData[]) {
   Serial.println("Reading from RFID-Card...");
   Serial.print("Card UID: ");
   for (byte i = 0; i < mfrc522.uid.size; i++) {
-    if (mfrc522.uid.uidByte[i] < 16) Serial.print("0"); //Fuehrende Null anzeigen
+    //if (mfrc522.uid.uidByte[i] < 16) {Serial.print("0");} //Fuehrende Null anzeigen
     Serial.print(mfrc522.uid.uidByte[i], HEX);
     Serial.print(" ");
   }
