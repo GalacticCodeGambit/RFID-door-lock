@@ -42,8 +42,7 @@ byte keyData[16] = {              // Festlegen des Daten-Schluessels
 const byte keyDataBlockNumber = 2;      // Speicher Ort des Daten-Schluessel im Block
 byte readData[18];
 byte size = sizeof(readData);
-bool rfidReadyMessageDisplayed = false; // Variable to track if the RFID ready message was displayed
-bool noClientsConnectedPreviously = true; // Variable to track if there were no clients connected previously
+bool rfidReadyMessageDisplayed = false;   // Variable to track if the RFID ready message was displayed
 
 void setup() {
   Serial.begin(115200);
@@ -62,8 +61,10 @@ void setup() {
   mfrc522.PCD_Init();             // Start des RFID Sensor
   delay(4);
   for (byte i = 0; i < 6; i++)key.keyByte[i] = myKey[i]; //Key festlegen
-  Serial.println();
-  mfrc522.PCD_DumpVersionToSerial();  // Details vom PCI-MFRC522 RFID-Reader/Writer ausgeben
+  /*
+    Serial.println();
+    mfrc522.PCD_DumpVersionToSerial();  // Details vom PCI-MFRC522 RFID-Reader/Writer ausgeben
+  */
 }
 
 void loop () {
@@ -78,11 +79,6 @@ void loop () {
         clients[i] = server.available();
         Serial.print("New client connected, ID: ");
         Serial.println(i);
-        if (noClientsConnectedPreviously) {
-          Serial.println("RFID-Reader bereit zum lesen...\n");
-          noClientsConnectedPreviously = false;
-          rfidReadyMessageDisplayed = true; // Prevent duplicate message when new client connects
-        }
         break;
       }
     }
@@ -108,11 +104,10 @@ void loop () {
     // Sobald eine Karte aufgelegt wird startet das Auslesen
     if (mfrc522.PICC_IsNewCardPresent()) {
       readRFIDcard(keyDataBlockNumber, readData);
-      rfidReadyMessageDisplayed = false;
     }
 
 
-    // If sendLedHigh is true, send "LED high" to all connected clients
+    // send "LED high" to all connected clients
     if (sendLedHigh) {
       sendLedHighToClients();
       sendLedHigh = false;   // Reset the variable to avoid resending immediately
@@ -121,7 +116,7 @@ void loop () {
       expectedResponse = "LED ist an";
     }
 
-    // If sendLedLow is true, send "LED low" to all connected clients
+    // send "LED low" to all connected clients
     if (sendLedLow) {
       sendLedLowToClients();
       sendLedLow = false;    // Reset the variable to avoid resending immediately
@@ -147,7 +142,11 @@ void loop () {
               Serial.print("Client ");
               Serial.print(i);
               Serial.println(" confirmed LED status");
-            } else {
+            } else if (response == "LED ist aus") {
+              LEDstatus = "low";
+              Serial.println("Client confirmed LED is off");
+            }
+            else {
               allClientsResponded = false;
             }
           } else {
@@ -157,11 +156,16 @@ void loop () {
       }
 
       if (allClientsResponded) {
-        LEDstatus = (expectedResponse == "LED ist an") ? "high" : "low";
+        if (expectedResponse == "LED ist an") {
+          LEDstatus = "high";
+        } else if (expectedResponse == "LED ist aus") {
+          LEDstatus = "low";
+        }
         Serial.println("All clients confirmed LED status");
         waitingForResponse = false;   // Stop waiting for responses
         resendCount = 0;
-      } else if (millis() - lastSendTime >= resendInterval) {
+        rfidReadyMessageDisplayed = false;
+      } else if (millis() - lastSendTime >= resendInterval) {   // Resending LED status
         if (resendCount < maxResendAttempts) {
           Serial.println("Resending LED status to clients...");
           if (expectedResponse == "LED ist an") {
@@ -176,13 +180,13 @@ void loop () {
           Serial.println();
           waitingForResponse = false; // Stop waiting after max attempts
           resendCount = 0;
+          rfidReadyMessageDisplayed = false;
         }
       }
     }
   } else {
     delay(1000);
     if (connectedClients == 0) {
-      noClientsConnectedPreviously = true;
       rfidReadyMessageDisplayed = false;
     }
     Serial.println("Error no clients connected");
@@ -255,10 +259,10 @@ void readRFIDcard(const byte keyDataBlockNumber, byte readData[]) {
     }
     if (count == 16) {
       sendLedHigh = true;
-      Serial.println(F("Entriegelt :-)"));
+      Serial.println("Entriegelt :-)");
     } else {
       sendLedLow = true;
-      Serial.println(F("Falsche RFID-Karte :-("));
+      Serial.println("Falsche RFID-Karte :-(");
     }
   }
   mfrc522.PICC_HaltA();
