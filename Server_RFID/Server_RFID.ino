@@ -4,8 +4,8 @@
 
 char ssid[] = "lol";                      // SSID of your home WiFi
 char pass[] = "lol123456789";             // password of your home WiFi
-WiFiServer server(80);                    // Server Port
 const byte maxClientNumber = 5;
+WiFiServer server(80);                    // Server Port
 WiFiClient clients[maxClientNumber];
 
 IPAddress ip(192, 168, 137, 80);          // IP address of the server
@@ -18,8 +18,8 @@ String LEDstatus = "low";                 // Current status of LED
 
 unsigned long lastSendTime = 0;
 const unsigned long resendInterval = 3000; // Interval for resending message
-int resendCount = 0;
-const int maxResendAttempts = 2;
+byte resendCount = 0;
+const byte maxResendAttempts = 2;
 bool waitingForResponse = false;
 String expectedResponse = "";
 
@@ -61,10 +61,6 @@ void setup() {
   mfrc522.PCD_Init();             // Start des RFID Sensor
   delay(4);
   for (byte i = 0; i < 6; i++)key.keyByte[i] = myKey[i]; //Key festlegen
-  /*
-    Serial.println();
-    mfrc522.PCD_DumpVersionToSerial();  // Details vom PCI-MFRC522 RFID-Reader/Writer ausgeben
-  */
 }
 
 void loop () {
@@ -98,7 +94,7 @@ void loop () {
 
   if (connectedClients != 0) {
     if (!rfidReadyMessageDisplayed) {
-      Serial.println("RFID-Reader bereit zum lesen...\n");
+      Serial.println("\nRFID-Reader bereit zum lesen...\n\n");
       rfidReadyMessageDisplayed = true;
     }
     // Sobald eine Karte aufgelegt wird startet das Auslesen
@@ -132,6 +128,7 @@ void loop () {
         if (clients[i] && clients[i].connected()) {
           if (clients[i].available()) {
             String response = clients[i].readStringUntil('\r');
+            Serial.println();
             Serial.print("Client ");
             Serial.print(i);
             Serial.print(" says: ");
@@ -186,11 +183,8 @@ void loop () {
     }
   } else {
     delay(1000);
-    if (connectedClients == 0) {
-      rfidReadyMessageDisplayed = false;
-    }
+    rfidReadyMessageDisplayed = false;
     Serial.println("Error no clients connected");
-    Serial.println(connectedClients); // Test
   }
 }
 
@@ -261,12 +255,10 @@ void readRFIDcard(const byte keyDataBlockNumber, byte readData[]) {
       sendLedHigh = true;
       Serial.println("Entriegelt :-)");
     } else {
-      sendLedLow = true;
       Serial.println("Falsche RFID-Karte :-(");
+      rfidReadyMessageDisplayed = false;
     }
   }
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
-
-  Serial.println();
 }

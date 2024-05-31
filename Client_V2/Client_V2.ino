@@ -7,9 +7,9 @@ const byte LEDpin = D4;
 String LEDstatus = "aus";
 
 unsigned long lastConnectionAttempt = 0;
-const unsigned long connectionAttemptInterval = 5000;  // Versuchsintervall für die Verbindung (in Millisekunden)
+const unsigned long connectionAttemptInterval = 5000; // Versuchsintervall für die Verbindung (in Millisekunden)
 unsigned long lastSetTime = 0;
-const unsigned long resetInterval = 5 * 1000; // Zeit bis LED wieder aus geht
+const unsigned long resetInterval = 5 * 1000;         // Zeit bis LED wieder aus geht
 
 IPAddress server(192, 168, 137, 80);  // the fix IP address of the server
 WiFiClient client;
