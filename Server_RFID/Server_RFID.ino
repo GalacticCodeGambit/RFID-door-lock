@@ -16,9 +16,6 @@ bool sendLedHigh = false;                 // Variable to initiate LED high reque
 bool sendLedLow = false;                  // Variable to initiate LED low request
 String LEDstatus = "low";                 // Current status of LED
 
-unsigned long lastCardPresentTime = 0;
-const unsigned long cardDebounceTime = 5000; // Intervall for re-reading RFID-Card
-
 unsigned long lastSendTime = 0;
 const unsigned long resendInterval = 3000;   // Interval for resending message
 byte resendCount = 0;
@@ -101,15 +98,10 @@ void loop () {
       Serial.println("\nRFID-Reader bereit zum lesen...\n\n");
       rfidReadyMessageDisplayed = true;
     }
-    // Sobald eine Karte aufgelegt wird startet das Auslesen
+    // startet das Auslesen sobald eine Karte aufgelegt wird
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-      unsigned long currentTime = millis();
-      if (currentTime - lastCardPresentTime >= cardDebounceTime) {
-        readRFIDcard();
-        lastCardPresentTime = currentTime;
-      }
+      readRFIDcard();
     }
-
 
     // send "LED high" to all connected clients
     if (sendLedHigh) {
