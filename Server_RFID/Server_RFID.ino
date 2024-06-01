@@ -2,22 +2,22 @@
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 
-char ssid[] = "lol";                      // SSID of your home WiFi
-char pass[] = "lol123456789";             // password of your home WiFi
+char ssid[] = "lol";                       // SSID of your WiFi
+char pass[] = "lol123456789";              // Password of your WiFi
 const byte maxClientNumber = 5;
-WiFiServer server(80);                    // Server Port
+WiFiServer server(80);                     // Server Port
 WiFiClient clients[maxClientNumber];
 
-IPAddress ip(192, 168, 137, 80);          // IP address of the server
-IPAddress gateway(0, 0, 0, 0);            // gateway of your network
-IPAddress subnet(255, 255, 255, 0);       // subnet mask of your network
+IPAddress ip(192, 168, 137, 80);           // IP address of the server
+IPAddress gateway(0, 0, 0, 0);             // Gateway of your network
+IPAddress subnet(255, 255, 255, 0);        // Subnet mask of your network
 
-bool sendLedHigh = false;                 // Variable to initiate LED high request
-bool sendLedLow = false;                  // Variable to initiate LED low request
-String LEDstatus = "low";                 // Current status of LED
+bool sendLedHigh = false;                  // Variable to initiate LED high request
+bool sendLedLow = false;                   // Variable to initiate LED low request
+String LEDstatus = "low";                  // Current status of LED
 
 unsigned long lastSendTime = 0;
-const unsigned long resendInterval = 3000;   // Interval for resending message
+const unsigned long resendInterval = 3000; // Interval for resending message
 byte resendCount = 0;
 const byte maxResendAttempts = 2;
 bool waitingForResponse = false;
@@ -28,40 +28,40 @@ String expectedResponse = "";
 #define SS_PIN  D8
 #define RST_PIN  D4
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);       // MFRC522-Instanz erstellen
+MFRC522 mfrc522(SS_PIN, RST_PIN);          // MFRC522-Instanz erstellen
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
 
-byte myKey[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; // Festlegen des Authentifizierungs-Schluessels
-byte keyData[16] = {                    // Festlegen des Daten-Schluessels
+byte authenticationKey[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; 
+byte dataKey[16] = {                       // Setting the data-key
   0x20, 0x20, 0x20, 0x20,
   0x20, 0x20, 0x20, 0x20,
   0x20, 0x20, 0x20, 0x20,
   0x20, 0x20, 0xfe, 0x3f
 };
-const byte keyDataBlockNumber = 2;      // Speicher Ort des Daten-Schluessel im Block
+const byte dataKeyBlockNumber = 2;         // Location of the data-key in the block
 byte readData[18];
 byte len = 18;
-bool rfidReadyMessageDisplayed = false; // Variable to track if the RFID ready message was displayed
+bool rfidReadyMessageDisplayed = false;    // Variable to track if the RFID ready message was displayed
 
 
 void setup() {
   Serial.begin(115200);
-  WiFi.config(ip, gateway, subnet);     // forces to use the fix IP
-  WiFi.begin(ssid, pass);               // connects to the WiFi router
+  WiFi.config(ip, gateway, subnet);        // Forces to use the fix IP
+  WiFi.begin(ssid, pass);                  // Connects to the WiFi router
   Serial.println();
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
-  server.begin();                       // starts the server
+  server.begin();                          // Starts the server
   Serial.println("\nConnected to wifi\nServer started");
 
   // RFID
   SPI.begin();
-  mfrc522.PCD_Init();                   // Start des RFID Sensor
+  mfrc522.PCD_Init();                      // Starting the RFID sensor
   delay(4);
-  for (byte i = 0; i < 6; i++)key.keyByte[i] = myKey[i]; //Key festlegen
+  for (byte i = 0; i < 6; i++)key.keyByte[i] = authenticationKey[i]; //Key festlegen
 }
 
 void loop () {
@@ -95,30 +95,30 @@ void loop () {
 
   if (connectedClients != 0) {
     if (!rfidReadyMessageDisplayed) {
-      Serial.println("\nRFID-Reader bereit zum lesen...\n\n");
+      Serial.println("\nRFID-Reader ready to read...\n\n");
       rfidReadyMessageDisplayed = true;
     }
-    // startet das Auslesen sobald eine Karte aufgelegt wird
+    // Starts reading as soon as a card is placed
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       readRFIDcard();
     }
 
-    // send "LED high" to all connected clients
+    // Send "LED high" to all connected clients
     if (sendLedHigh) {
       sendLedHighToClients();
-      sendLedHigh = false;   // Reset the variable to avoid resending immediately
+      sendLedHigh = false;   
       waitingForResponse = true;
       lastSendTime = millis();
-      expectedResponse = "LED ist an";
+      expectedResponse = "LED is on";
     }
 
-    // send "LED low" to all connected clients
+    // Send "LED low" to all connected clients
     if (sendLedLow) {
       sendLedLowToClients();
-      sendLedLow = false;    // Reset the variable to avoid resending immediately
+      sendLedLow = false;    
       waitingForResponse = true;
       lastSendTime = millis();
-      expectedResponse = "LED ist aus";
+      expectedResponse = "LED is off";
     }
 
     // Process responses from clients
@@ -129,19 +129,14 @@ void loop () {
           if (clients[i].available()) {
             String response = clients[i].readStringUntil('\r');
             Serial.println();
-            Serial.print("Client ");
-            Serial.print(i);
-            Serial.print(" says: ");
-            Serial.println(response);
+            Serial.println("Client " + String(i) + " says: " + String(response));
             clients[i].flush();
 
             if (response == expectedResponse) {
-              Serial.print("Client ");
-              Serial.print(i);
-              Serial.println(" confirmed LED status");
-            } else if (response == "LED ist aus") {
+              Serial.println("Client " + String(i) + " confirmed LED status");
+            } else if (response == "LED is off") {
               LEDstatus = "low";
-              Serial.println("Client confirmed LED is off");
+              Serial.println("Client " + String(i) + " confirmed LED is off");
             }
             else {
               allClientsResponded = false;
@@ -153,9 +148,9 @@ void loop () {
       }
 
       if (allClientsResponded) {
-        if (expectedResponse == "LED ist an") {
+        if (expectedResponse == "LED is on") {
           LEDstatus = "high";
-        } else if (expectedResponse == "LED ist aus") {
+        } else if (expectedResponse == "LED is off") {
           LEDstatus = "low";
         }
         Serial.println("All clients confirmed LED status");
@@ -165,7 +160,7 @@ void loop () {
       } else if (millis() - lastSendTime >= resendInterval) {   // Resending LED status
         if (resendCount < maxResendAttempts) {
           Serial.println("Resending LED status to clients...");
-          if (expectedResponse == "LED ist an") {
+          if (expectedResponse == "LED is on") {
             sendLedHighToClients();
           } else {
             sendLedLowToClients();
@@ -173,7 +168,7 @@ void loop () {
           lastSendTime = millis();
           resendCount++;
         } else {
-          Serial.println("Client antwortet nicht");
+          Serial.println("Client doesn't respond");
           Serial.println();
           waitingForResponse = false; // Stop waiting after max attempts
           resendCount = 0;
@@ -209,18 +204,17 @@ void readRFIDcard() {
   //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test dumpt alle Daten von RFID-Karte
 
   // Zusatz Informationen
-  Serial.println("Reading from RFID-Card...");
+  Serial.println("Reading from RFID card...");
   Serial.print("Card UID: ");
   for (byte i = 0; i < mfrc522.uid.size; i++) {
-    //if (mfrc522.uid.uidByte[i] < 16) {Serial.print("0");} //Fuehrende Null anzeigen
     Serial.print(mfrc522.uid.uidByte[i], HEX);
     Serial.print(" ");
   }
   Serial.print("  |  PICC type: ");
-  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Modell der RFID-Karte
+  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Model of the RFID card 
   Serial.println(mfrc522.PICC_GetTypeName(piccType));
 
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, keyDataBlockNumber, &key, &(mfrc522.uid));
+  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, dataKeyBlockNumber, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK) {
     Serial.print("Authentication failed for Read: ");
     Serial.println(mfrc522.GetStatusCodeName(status));
@@ -229,14 +223,14 @@ void readRFIDcard() {
     Serial.println("Authentication success");
   }
 
-  status = mfrc522.MIFARE_Read(keyDataBlockNumber, readData, &len);
+  status = mfrc522.MIFARE_Read(dataKeyBlockNumber, readData, &len);
   if (status != MFRC522::STATUS_OK) {
     Serial.print("Reading failed: ");
     Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   } else {
     Serial.println("Block was read successfully");
-    Serial.println("Data in block " + String(keyDataBlockNumber) + ":");
+    Serial.println("Data in block " + String(dataKeyBlockNumber) + ":");
     Serial.print(" -->");
     for (byte i = 0; i < 16; i++) {
       Serial.print(readData[i] < 10 & 0x10 ? " 0" : " ");
@@ -246,15 +240,15 @@ void readRFIDcard() {
 
     byte count = 0;
     for (byte i = 0; i < 16; i++) {
-      // Vergleicht readData mit keyData
-      if (readData[i] == keyData[i])
+      // Compares readData with dataKey
+      if (readData[i] == dataKey[i])
         count++;
     }
     if (count == 16) {
       sendLedHigh = true;
-      Serial.println("Entriegelt :-)");
+      Serial.println("unlocked :-)");
     } else {
-      Serial.println("Falsche RFID-Karte :-(");
+      Serial.println("incorrect RFID card :-(");
       rfidReadyMessageDisplayed = false;
     }
   }

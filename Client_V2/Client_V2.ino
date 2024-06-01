@@ -1,79 +1,81 @@
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 
-char ssid[] = "lol";                  // SSID of your home WiFi
-char pass[] = "lol123456789";         // password of your home WiFi
+char ssid[] = "lol";                                  // SSID of your WiFi
+char pass[] = "lol123456789";                         // Password of your WiFi
 const byte LEDpin = D4;
-String LEDstatus = "aus";
+String LEDstatus = "off";
 
+unsigned long currentMillis = 0;
 unsigned long lastConnectionAttempt = 0;
-const unsigned long connectionAttemptInterval = 5000; // Versuchsintervall für die Verbindung (in Millisekunden)
+const unsigned long connectionAttemptInterval = 5000; // Connection attempt interval (in milliseconds)
 unsigned long lastSetTime = 0;
-const unsigned long resetInterval = 5 * 1000;         // Zeit bis LED wieder aus geht
+const unsigned long resetInterval = 5000;             // Time until LED goes off again
 
-IPAddress server(192, 168, 137, 80);  // the fix IP address of the server
+IPAddress server(192, 168, 137, 80);                  // The fix IP address of the server
 WiFiClient client;
 
 void setup() {
   Serial.begin(115200);
   pinMode(LEDpin, OUTPUT);
 
-  WiFi.begin(ssid, pass);             // connects to the WiFi router
+  WiFi.begin(ssid, pass);                             // Connects to the WiFi router
   Serial.println();
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
   Serial.println("Connected to wifi");
-  reconnectToServer();                // Verbindung zum Server herstellen
+  reconnectToServer();                                // Connect to the server
 }
 
 void loop() {
-  if (!client.connected()) {         // Bei Verbindungsverlusst mit Server neu Verbinden
-    if (millis() - lastConnectionAttempt >= connectionAttemptInterval) {
+  currentMillis = millis();
+  if (!client.connected()) {                          // If connection is lost, reconnect to server
+    if (currentMillis - lastConnectionAttempt >= connectionAttemptInterval) {
       reconnectToServer();
     }
   } else {
     handleServerCommunication();
   }
-  if (LEDstatus == "an" && millis() - lastSetTime >= resetInterval) {  // LED nach resetInterval auf Low stellen
+  if (LEDstatus == "on" && currentMillis - lastSetTime >= resetInterval) {  // Set LED to low after resetInterval
     digitalWrite(LEDpin, LOW);
-    LEDstatus = "aus";
-    client.print("LED ist aus\r");
+    LEDstatus = "off";
+    client.print("LED is off\r");
   }
-  delay(1000);                                         // Kleine Pause für Stabilität
+  delay(1000);                                        // Small break for stability
 }
 
 void reconnectToServer() {
-  Serial.println("Versuche, die Verbindung zum Server wiederherzustellen...");
+  Serial.println("Attempting to reconnect to the server...");
   /*  if (client.connected()) { //Zum Testen entfernen
       client.stop();
     }*/
   // Verbindung zum Server herstellen
   if (client.connect(server, 80)) {
-    Serial.println("Verbunden mit dem Server.");
+    Serial.println("Connected to the server.");
   } else {
-    Serial.println("Verbindung zum Server fehlgeschlagen.");
+    Serial.println("Connection to server failed.");
   }
-  lastConnectionAttempt = millis();    // Aktualisieren des Zeitstempel des letzten Verbindungsversuchs
+  lastConnectionAttempt = millis();
 }
 
 void handleServerCommunication() {
-  if (client.available()) {                          // Nachricht vom Server empfangen
+  if (client.available()) {                           // Message from server
     String request = client.readStringUntil('\r');
-    if (request.length() > 0) {                      // Nur wenn eine tatsächliche Nachricht empfangen wurde
+    if (request.length() > 0) {                       // Verify that data has been received
       Serial.println("Nachricht vom Server: " + request);
       if (request == "LED high") {
         digitalWrite(LEDpin, HIGH);
-        LEDstatus = "an";
+        LEDstatus = "on";
         lastSetTime = millis();
-        client.print("LED ist " + LEDstatus + '\r'); // Antwort an Server senden
+        client.print("LED is " + LEDstatus + '\r');  // Send response to server
       } else if (request == "LED low") {
         digitalWrite(LEDpin, LOW);
-        LEDstatus = "aus";
-        client.print("LED ist " + LEDstatus + '\r'); // Antwort an Server senden
+        LEDstatus = "off";
+        client.print("LED is " + LEDstatus + '\r');
       }
-      request = "";                                  // Request leeren
+      request = "";
     }
   }
 }
