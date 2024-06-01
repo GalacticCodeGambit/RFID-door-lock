@@ -16,8 +16,11 @@ bool sendLedHigh = false;                 // Variable to initiate LED high reque
 bool sendLedLow = false;                  // Variable to initiate LED low request
 String LEDstatus = "low";                 // Current status of LED
 
+unsigned long lastCardPresentTime = 0;
+const unsigned long cardDebounceTime = 5000; // Intervall for re-reading RFID-Card
+
 unsigned long lastSendTime = 0;
-const unsigned long resendInterval = 3000; // Interval for resending message
+const unsigned long resendInterval = 3000;   // Interval for resending message
 byte resendCount = 0;
 const byte maxResendAttempts = 2;
 bool waitingForResponse = false;
@@ -28,12 +31,12 @@ String expectedResponse = "";
 #define SS_PIN  D8
 #define RST_PIN  D4
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // MFRC522-Instanz erstellen
+MFRC522 mfrc522(SS_PIN, RST_PIN);       // MFRC522-Instanz erstellen
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
 
 byte myKey[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; // Festlegen des Authentifizierungs-Schluessels
-byte keyData[16] = {              // Festlegen des Daten-Schluessels
+byte keyData[16] = {                    // Festlegen des Daten-Schluessels
   0x20, 0x20, 0x20, 0x20,
   0x20, 0x20, 0x20, 0x20,
   0x20, 0x20, 0x20, 0x20,
@@ -41,24 +44,25 @@ byte keyData[16] = {              // Festlegen des Daten-Schluessels
 };
 const byte keyDataBlockNumber = 2;      // Speicher Ort des Daten-Schluessel im Block
 byte readData[18];
-byte size = sizeof(readData);
-bool rfidReadyMessageDisplayed = false;   // Variable to track if the RFID ready message was displayed
+byte len = 18;
+bool rfidReadyMessageDisplayed = false; // Variable to track if the RFID ready message was displayed
+
 
 void setup() {
   Serial.begin(115200);
-  WiFi.config(ip, gateway, subnet);       // forces to use the fix IP
-  WiFi.begin(ssid, pass);                 // connects to the WiFi router
+  WiFi.config(ip, gateway, subnet);     // forces to use the fix IP
+  WiFi.begin(ssid, pass);               // connects to the WiFi router
   Serial.println();
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
-  server.begin();                         // starts the server
+  server.begin();                       // starts the server
   Serial.println("\nConnected to wifi\nServer started");
 
   // RFID
   SPI.begin();
-  mfrc522.PCD_Init();             // Start des RFID Sensor
+  mfrc522.PCD_Init();                   // Start des RFID Sensor
   delay(4);
   for (byte i = 0; i < 6; i++)key.keyByte[i] = myKey[i]; //Key festlegen
 }
@@ -98,8 +102,12 @@ void loop () {
       rfidReadyMessageDisplayed = true;
     }
     // Sobald eine Karte aufgelegt wird startet das Auslesen
-    if (mfrc522.PICC_IsNewCardPresent()) {
-      readRFIDcard(keyDataBlockNumber, readData);
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+      unsigned long currentTime = millis();
+      if (currentTime - lastCardPresentTime >= cardDebounceTime) {
+        readRFIDcard();
+        lastCardPresentTime = currentTime;
+      }
     }
 
 
@@ -205,9 +213,8 @@ void sendLedLowToClients() {
 }
 
 // RFID
-void readRFIDcard(const byte keyDataBlockNumber, byte readData[]) {
+void readRFIDcard() {
   //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test dumpt alle Daten von RFID-Karte
-  mfrc522.PICC_ReadCardSerial();
 
   // Zusatz Informationen
   Serial.println("Reading from RFID-Card...");
@@ -230,7 +237,7 @@ void readRFIDcard(const byte keyDataBlockNumber, byte readData[]) {
     Serial.println("Authentication success");
   }
 
-  status = mfrc522.MIFARE_Read(keyDataBlockNumber, readData, &size);
+  status = mfrc522.MIFARE_Read(keyDataBlockNumber, readData, &len);
   if (status != MFRC522::STATUS_OK) {
     Serial.print("Reading failed: ");
     Serial.println(mfrc522.GetStatusCodeName(status));
