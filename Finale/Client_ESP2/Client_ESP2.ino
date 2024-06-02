@@ -28,11 +28,10 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 const char *ssid = APSSID;
 const char *password = APPSK;
-const char *host = "esp2";
 
 ESP8266WebServer server(80);
 
-IPAddress ServerIP(192, 168, 1, 1), unset;
+IPAddress ServerIP, unset;
 bool ipStored = false;
 String str = "Hello World";
 String ssidnew, psknew;
