@@ -50,6 +50,51 @@ const unsigned long connectionAttemptInterval = 5000; // Connection attempt inte
 WiFiClient client;
 
 
+void setup() {
+  EEPROMr.size(4);
+  EEPROMr.begin(4096);
+  Serial.begin(115200);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  delay(200);
+
+  pinMode(LEDpin, OUTPUT);
+  digitalWrite(LEDpin, 0);
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  readall();
+
+  delay(500);
+  WiFi.begin(ssidnew, psknew);
+
+  reconnect1(0);
+
+  reconnectToServer();                                // Connect to the TCP/IP Masterdevice
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+}
+
+void loop() {
+  currentMillis = millis();
+  if (!client.connected()) {                          // If connection is lost, reconnect to server
+    if (currentMillis - lastConnectionAttempt >= connectionAttemptInterval) {
+      reconnectToServer();
+    }
+  } else {
+    handleServerCommunication();
+  }
+
+  if (WiFi.status() != WL_CONNECTED) {  //reeconeting falls verbindungsabbruch
+    reconnect1(1);
+  }
+  delay(200);
+}
+
 void handleRoot() { //Root handler for Access Point
   String message = "<html><head><title>Configuration Page</title>";
   message += "<script>";
@@ -299,51 +344,6 @@ void reconnect1(int state) {  //if not reconnect, then go back in Access Point m
   display.println(WiFi.localIP());
   display.display();
 
-}
-
-void setup() {
-  EEPROMr.size(4);
-  EEPROMr.begin(4096);
-  Serial.begin(115200);
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  delay(200);
-
-  pinMode(LEDpin, OUTPUT);
-  digitalWrite(LEDpin, 0);
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  readall();
-
-  delay(500);
-  WiFi.begin(ssidnew, psknew);
-
-  reconnect1(0);
-
-  reconnectToServer();                                // Connect to the TCP/IP Masterdevice
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-}
-
-void loop() {
-  currentMillis = millis();
-  if (!client.connected()) {                          // If connection is lost, reconnect to server
-    if (currentMillis - lastConnectionAttempt >= connectionAttemptInterval) {
-      reconnectToServer();
-    }
-  } else {
-    handleServerCommunication();
-  }
-
-  if (WiFi.status() != WL_CONNECTED) {  //reeconeting falls verbindungsabbruch
-    reconnect1(1);
-  }
-  delay(200);
 }
 
 void reconnectToServer() {  //reconnect to TCP/IP Masterdevice
