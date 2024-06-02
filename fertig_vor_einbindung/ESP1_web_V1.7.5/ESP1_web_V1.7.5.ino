@@ -33,9 +33,8 @@ const char *password = APPSK;
 
 ESP8266WebServer server(80);
 
-//IPAddress gate(192, 168, 1, 1);
-IPAddress gate;
-IPAddress subnet(255, 255, 254, 0);
+IPAddress gateway;
+IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(8, 8, 8, 8);
 IPAddress secondaryDNS(8, 8, 4, 4);
 
@@ -57,9 +56,7 @@ bool lock = true;
 
 String lockStatus;
 
-#define LED_Pin D0
-
-void handleRoot() {
+void handleRoot() { //Root handler for Wifi and Access Point connection || Wifi + AP
   String message = "<html><head>";
   if (wifiBool) { //wifi mode
     message += "<meta charset='UTF-8'>";
@@ -88,6 +85,7 @@ void handleRoot() {
     message += "<input type='submit' value='Renew IP Address list'></form>";
     message += "<form action='/ap'><input type='submit' value='APmode'></form>";
   } else {  //AP mode
+    message += "<title>Configuration Page</title>";
     message += "<script>";
     message += "function togglePassword() {";
     message += "  var x = document.getElementById('psk');";
@@ -99,7 +97,8 @@ void handleRoot() {
     message += "}";
     message += "</script></head>";
 
-    message += "<body><h3>Enter IP Address to store:</h3>";
+    message += "<body><h1>Configuration Page</h1>";
+    message += "<body><h3>Enter static IP Address for ESP1:</h3>";
     message += "<form action='/sub' method='get'>";
     message += "<input type='text' name='ip' value='" + ipstore.toString() + "'>";
 
@@ -124,13 +123,13 @@ void handleRoot() {
   server.send(200, "text/html", message);
 }
 
-void handleShowPassword() {
+void handleShowPassword() { //switch bool to show/unshow Password || AP
   showPassword = !showPassword;
   server.sendHeader("Location", "/", true);
   server.send(303);
 }
 
-void handlesub() {
+void handlesub() {  //submites all written values into variables || AP
   str = "Storing successful";
   String ip = server.arg("ip");
   if (ip.length() > 0) {
@@ -158,7 +157,7 @@ void handlesub() {
   server.send(303);
 }
 
-void handleclose() {
+void handleclose() {  //stops the Access Point mode and switch to Wifi mode || stores variables in EEPROM || AP
   String message = "<html><head>";
   message += "<meta http-equiv='refresh' content='10'>";
   message += "<script>";
@@ -224,7 +223,7 @@ void handleclose() {
   srun = false;
 }
 
-void readall() {
+void readall() {  //reads values for Variables from EEPROM
   int i, j;
   for (i = 0; i < 4; i++) {
     ipstore[i] = EEPROMr.read(DATA_OFFSET + i);
@@ -263,15 +262,15 @@ void readall() {
   }
 }
 
-void handleGetLockStatus() {
+void handleGetLockStatus() {  //let the Website Autorenew the Lockstate || Wifi
   lockStatus = lock ? "locked" : "unlocked";
   server.send(200, "text/plain", lockStatus);
 }
 
-void handleIPrenew () { //frediey
+void handleIPrenew () { //loads new list of connected Clients || Wifi
   clientnumber = 0;
   for (int i = 0; i < maxClientNumber; i++) {
-    if (clients[i]) {
+    if (clients[i] && clients[i].connected()) {
       clientIP[clientnumber] = clients[i].remoteIP();
       clientnumber++;
     }
@@ -280,14 +279,12 @@ void handleIPrenew () { //frediey
   server.send(303);  // Send response with redirect
 }
 
-void handleAP() {
+void handleAP() { //goes into Access Point mode || Wifi to AP
   APmode();
   reconnect1(1);
-  server.sendHeader("Location", "/", true);   // Redirect to root page
-  server.send(303);  // Send response with redirect
 }
 
-void handleautoIPassign() {
+void handleautoIPassign() { //let the DHCP assign the IP-Address || AP to Wifi
   autoIPassignBool = true;
 
   WiFi.softAPdisconnect(true);
@@ -302,11 +299,11 @@ void handleautoIPassign() {
   WiFi.begin(ssidnew, psknew);
 
   reconnect1(0);
-  
+
   ipstore = WiFi.localIP();
 
-  gate = ipstore;
-  gate[3] = 1;
+  gateway = ipstore;
+  gateway[3] = 1;
 
   for (int i = 0; i < 4; i++) {
     EEPROMr.write(DATA_OFFSET + i, ipstore[i]);
@@ -315,54 +312,7 @@ void handleautoIPassign() {
   EEPROMr.commit();
 }
 
-void setup() {
-  EEPROMr.size(4);
-  EEPROMr.begin(4096);
-  Serial.begin(115200);
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  delay(200);
-
-  pinMode(LED_Pin, OUTPUT);
-  digitalWrite(LED_Pin, 0);
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  readall();
-
-  lockStatus = lock ? "locked" : "unlocked";
-
-  delay(500);
-  gate = ipstore;
-  gate[3] = 1;
-  if (ipstore != unset && ipstore != gate) WiFi.config(ipstore, gate, subnet);
-  WiFi.begin(ssidnew, psknew);
-
-  reconnect1(0);
-
-  //wifi + AP mode
-  server.on("/", handleRoot);
-
-  //wifi mode
-  server.on("/iprenew", handleIPrenew);
-  server.on("/getLockStatus", handleGetLockStatus);
-  server.on("/ap", handleAP);
-
-  //AP mode
-  server.on("/showPassword", handleShowPassword);
-  server.on("/sub", handlesub);
-  server.on("/close", handleclose);
-  server.on("/autoIPassign", handleautoIPassign);
-  server.begin();
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-}
-
-void APmode() {
+void APmode() { //Access Point mode
   wifiBool = false;
   WiFi.softAP(ssid);
   Serial.println();
@@ -403,15 +353,15 @@ void APmode() {
     delay(500);
 
     //new IP assurence
-    gate = ipstore;
-    gate[3] = 1;
-    if (ipstore != unset && ipstore != gate) WiFi.config(ipstore, gate, subnet);
+    gateway = ipstore;
+    gateway[3] = 1;
+    if (ipstore != unset && ipstore != gateway) WiFi.config(ipstore, gateway, subnet);
   }
   autoIPassignBool = false;
 }
 
-void operatingproof() {
-  if (Ping.ping(gate)) {
+void operatingproof() { //checks, if static IP is working with the Network
+  if (Ping.ping(gateway)) {
     Serial.println("Ping successful, static IP is operable");
   } else {
     Serial.println("Ping failed, static IP is not operable");
@@ -420,10 +370,10 @@ void operatingproof() {
   }
 }
 
-void reconnect1(int s) {
+void reconnect1(int s) {  //if not reconnect, then go back in Access Point mode
   readall();
   int i = 0;
-  int minToAccessPointMode = 3;      
+  int minToAccessPointMode = 3;
   display.clearDisplay();
   display.setCursor(0, 0);  //Set the cursor after clearing the display
   switch (s) {
@@ -455,6 +405,50 @@ void reconnect1(int s) {
     i++;
   }
   operatingproof();
+}
+
+void setup() {
+  EEPROMr.size(4);
+  EEPROMr.begin(4096);
+  Serial.begin(115200);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  delay(200);
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  readall();
+
+  lockStatus = lock ? "locked" : "unlocked";
+
+  delay(500);
+  gateway = ipstore;
+  gateway[3] = 1;
+  if (ipstore != unset && ipstore != gateway) WiFi.config(ipstore, gateway, subnet);
+  WiFi.begin(ssidnew, psknew);
+
+  //wifi + AP mode
+  server.on("/", handleRoot);
+
+  //wifi mode
+  server.on("/iprenew", handleIPrenew);
+  server.on("/getLockStatus", handleGetLockStatus);
+  server.on("/ap", handleAP);
+
+  //AP mode
+  server.on("/showPassword", handleShowPassword);
+  server.on("/sub", handlesub);
+  server.on("/close", handleclose);
+  server.on("/autoIPassign", handleautoIPassign);
+  server.begin();
+
+  reconnect1(0);
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
 }
 
 void loop() {
