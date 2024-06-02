@@ -42,7 +42,7 @@ void loop() {
 void reconnectToServer() {
   Serial.println("Attempting to reconnect to the server...");
   // Verbindung zum Server herstellen
-  if (client.connect(server, 80)) {
+  if (client.connect(server, 40)) {
     Serial.println("Connected to the server.");
   } else {
     Serial.println("Connection to server failed.");
