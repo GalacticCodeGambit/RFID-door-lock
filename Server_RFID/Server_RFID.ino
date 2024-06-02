@@ -201,9 +201,8 @@ void sendLedLowToClients() {
 
 // RFID
 void readRFIDcard() {
-  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test dumpt alle Daten von RFID-Karte
+  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test dumps all data from RFID card
 
-  // Zusatz Informationen
   Serial.println("Reading from RFID card...");
   Serial.print("Card UID: ");
   for (byte i = 0; i < mfrc522.uid.size; i++) {
@@ -240,7 +239,6 @@ void readRFIDcard() {
 
     byte count = 0;
     for (byte i = 0; i < 16; i++) {
-      // Compares readData with dataKey
       if (readData[i] == dataKey[i])
         count++;
     }
