@@ -37,12 +37,12 @@ void loop() {
     }
   } else {
     handleServerCommunication();
-  }
+  }/*
   if (LEDstatus == "on" && currentMillis - lastSetTime >= resetInterval) {  // Set LED to low after resetInterval
     digitalWrite(LEDpin, LOW);
     LEDstatus = "off";
     client.print("LED is off\r");
-  }
+  }*/
   delay(1000);                                        // Small break for stability
 }
 

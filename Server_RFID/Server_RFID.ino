@@ -181,6 +181,13 @@ void loop () {
     rfidReadyMessageDisplayed = false;
     Serial.println("Error no clients connected");
   }
+  unsigned long currentMillis = millis();
+  unsigned long lastSetTime = 0;
+  unsigned long resetInterval = 5000;
+  if (LEDstatus == "on" && currentMillis - lastSetTime >= resetInterval) {
+    sendLedLow = true; 
+    lastSetTime = millis();
+    }
 }
 
 void sendLedHighToClients() {
