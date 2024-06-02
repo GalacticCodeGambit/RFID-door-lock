@@ -23,7 +23,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 #define DATA_OFFSET 10
 
-#define APSSID "ESPap"
+#define APSSID "ESP2ap"
 #define APPSK "thereisnospoon"
 
 const char *ssid = APSSID;
@@ -107,7 +107,7 @@ void handleRoot() { //Root handler for Access Point
   message += "}";
   message += "</script></head>";
 
-  message += "<body><h1>Configuration Page</h1>";
+  message += "<body><h1>Configuration Page ESP2</h1>";
   message += "<h3>Enter IP Address of ESP1:</h3>";
   message += "<form action='/sub' method='get'>";
   message += "<input type='text' name='ip' value='" + ServerIP.toString() + "'>";
@@ -332,7 +332,6 @@ void reconnect1(int state) {  //if not reconnect, then go back in Access Point m
       display.println("Connection failure");
       display.display();
       delay(1000);
-      //ESP.restart();
       APmode();
     }
     i++;
