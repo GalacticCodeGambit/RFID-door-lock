@@ -16,6 +16,10 @@ bool sendLedHigh = false;                  // Variable to initiate LED high requ
 bool sendLedLow = false;                   // Variable to initiate LED low request
 String LEDstatus = "low";                  // Current status of LED
 
+unsigned long currentMillis = 0;
+unsigned long lastSetTime = 0;
+const unsigned long resetInterval = 5000;
+
 unsigned long lastSendTime = 0;
 const unsigned long resendInterval = 3000; // Interval for resending message
 byte resendCount = 0;
@@ -106,19 +110,12 @@ void loop () {
     // Send "LED high" to all connected clients
     if (sendLedHigh) {
       sendLedHighToClients();
-      sendLedHigh = false;
-      waitingForResponse = true;
-      lastSendTime = millis();
-      expectedResponse = "LED is on";
+      lastSetTime = millis();
     }
 
     // Send "LED low" to all connected clients
     if (sendLedLow) {
       sendLedLowToClients();
-      sendLedLow = false;
-      waitingForResponse = true;
-      lastSendTime = millis();
-      expectedResponse = "LED is off";
     }
 
     // Process responses from clients
@@ -181,12 +178,14 @@ void loop () {
     rfidReadyMessageDisplayed = false;
     Serial.println("Error no clients connected");
   }
-  unsigned long currentMillis = millis();
-  unsigned long lastSetTime = 0;
-  unsigned long resetInterval = 5000;
-  if (LEDstatus == "on" && currentMillis - lastSetTime >= resetInterval) {
-    sendLedLow = true;
+  // LED auf off reseten
+  currentMillis = millis();
+  delay(200);
+  if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {
+    sendLedLowToClients();
+    //waitingForResponse = true;
     lastSetTime = millis();
+    Serial.println("Send low to Clients");
   }
 }
 
@@ -196,6 +195,10 @@ void sendLedHighToClients() {
       clients[i].print("LED high\r");
     }
   }
+  sendLedHigh = false;
+  waitingForResponse = true;
+  lastSendTime = millis();
+  expectedResponse = "LED is on";
 }
 
 void sendLedLowToClients() {
@@ -204,6 +207,10 @@ void sendLedLowToClients() {
       clients[i].print("LED low\r");
     }
   }
+  sendLedLow = false;
+  waitingForResponse = true;
+  lastSendTime = millis();
+  expectedResponse = "LED is off";
 }
 
 // RFID
