@@ -2,14 +2,14 @@
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 
-char ssid[] = "lol";                       // SSID of your WiFi
-char pass[] = "lol123456789";              // Password of your WiFi
+char ssid[] = "bastian";                       // SSID of your WiFi
+char pass[] = "Mechatronik1!";              // Password of your WiFi
 const byte maxClientNumber = 5;
 WiFiServer server(80);                     // Server Port
 WiFiClient clients[maxClientNumber];
 
 IPAddress ip(192, 168, 137, 80);           // IP address of the server
-IPAddress gateway(0, 0, 0, 0);             // Gateway of your network
+IPAddress gateway(192, 168, 137, 1);             // Gateway of your network
 IPAddress subnet(255, 255, 255, 0);        // Subnet mask of your network
 
 bool sendLedHigh = false;                  // Variable to initiate LED high request
@@ -128,7 +128,7 @@ void loop () {
         if (clients[i] && clients[i].connected()) {
           if (clients[i].available()) {
             String response = clients[i].readStringUntil('\r');
-            Serial.println();
+            //Serial.println();
             Serial.println("Client " + String(i) + " says: " + String(response));
             clients[i].flush();
 
@@ -169,7 +169,7 @@ void loop () {
           resendCount++;
         } else {
           Serial.println("Client doesn't respond");
-          Serial.println();
+          //Serial.println();
           waitingForResponse = false; // Stop waiting after max attempts
           resendCount = 0;
           rfidReadyMessageDisplayed = false;
@@ -185,9 +185,9 @@ void loop () {
   unsigned long lastSetTime = 0;
   unsigned long resetInterval = 5000;
   if (LEDstatus == "on" && currentMillis - lastSetTime >= resetInterval) {
-    sendLedLow = true; 
+    sendLedLow = true;
     lastSetTime = millis();
-    }
+  }
 }
 
 void sendLedHighToClients() {
@@ -252,6 +252,7 @@ void readRFIDcard() {
     if (count == 16) {
       sendLedHigh = true;
       Serial.println("unlocked :-)");
+      Serial.println();
     } else {
       Serial.println("incorrect RFID card :-(");
       rfidReadyMessageDisplayed = false;
