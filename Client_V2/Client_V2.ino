@@ -3,7 +3,7 @@
 
 char ssid[] = "lol";                                  // SSID of your WiFi
 char pass[] = "lol123456789";                         // Password of your WiFi
-const byte LEDpin = D4;
+const byte LEDpin = D3;
 String LEDstatus = "off";
 
 unsigned long currentMillis = 0;
@@ -63,6 +63,7 @@ void reconnectToServer() {
 void handleServerCommunication() {
   if (client.available()) {                           // Message from server
     String request = client.readStringUntil('\r');
+    
     if (request.length() > 0) {                       // Verify that data has been received
       Serial.println("Nachricht vom Server: " + request);
       if (request == "LED high") {
@@ -76,6 +77,7 @@ void handleServerCommunication() {
         client.print("LED is " + LEDstatus + '\r');
       }
       request = "";
+      Serial.println(lastSetTime);
     }
   }
 }

@@ -32,7 +32,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);          // MFRC522-Instanz erstellen
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
 
-byte authenticationKey[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; 
+byte authenticationKey[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 byte dataKey[16] = {                       // Setting the data-key
   0x20, 0x20, 0x20, 0x20,
   0x20, 0x20, 0x20, 0x20,
@@ -106,7 +106,7 @@ void loop () {
     // Send "LED high" to all connected clients
     if (sendLedHigh) {
       sendLedHighToClients();
-      sendLedHigh = false;   
+      sendLedHigh = false;
       waitingForResponse = true;
       lastSendTime = millis();
       expectedResponse = "LED is on";
@@ -115,7 +115,7 @@ void loop () {
     // Send "LED low" to all connected clients
     if (sendLedLow) {
       sendLedLowToClients();
-      sendLedLow = false;    
+      sendLedLow = false;
       waitingForResponse = true;
       lastSendTime = millis();
       expectedResponse = "LED is off";
@@ -210,7 +210,7 @@ void readRFIDcard() {
     Serial.print(" ");
   }
   Serial.print("  |  PICC type: ");
-  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Model of the RFID card 
+  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Model of the RFID card
   Serial.println(mfrc522.PICC_GetTypeName(piccType));
 
   status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, dataKeyBlockNumber, &key, &(mfrc522.uid));
