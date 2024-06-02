@@ -5,7 +5,7 @@
 char ssid[] = "bastian";                       // SSID of your WiFi
 char pass[] = "Mechatronik1!";              // Password of your WiFi
 const byte maxClientNumber = 5;
-WiFiServer server(80);                     // Server Port
+WiFiServer tcpServer(80);                     // Server Port
 WiFiClient clients[maxClientNumber];
 
 IPAddress ip(192, 168, 137, 80);           // IP address of the server
@@ -58,7 +58,7 @@ void setup() {
     Serial.print(".");
     delay(500);
   }
-  server.begin();                          // Starts the server
+  tcpServer.begin();                          // Starts the server
   Serial.println("\nConnected to wifi\nServer started");
 
   // RFID
@@ -70,14 +70,14 @@ void setup() {
 
 void loop () {
   // Accept new clients
-  if (server.hasClient()) {
+  if (tcpServer.hasClient()) {
     for (byte i = 0; i < maxClientNumber; i++) {
       // Freier Slot finden
       if (!clients[i] || !clients[i].connected()) {
         if (clients[i]) {
           clients[i].stop();
         }
-        clients[i] = server.available();
+        clients[i] = tcpServer.available();
         Serial.print("New client connected, ID: ");
         Serial.println(i);
         break;
