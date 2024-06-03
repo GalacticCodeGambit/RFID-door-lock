@@ -1,6 +1,6 @@
 # Tuerschloss-RFID
 
-### What we did use?
+### What we did use?:
 - 2x ESP8266 D1 mini pro
 - 2x OLED 0.66'' 64x48
 - RFID-RC522
@@ -25,5 +25,5 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 - WLAN-Konfiguration via Access-Point (Freischaltung durch Taster)
 - Die WLAN-Kommunikation verschlüsseln
 
-### Connection Diagram
+### Connection Diagram:
 <img width="419" alt="circuit board" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
