@@ -23,16 +23,15 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 #define DATA_OFFSET 10
 
-#define APSSID "ESPap"
+#define APSSID "ESP2ap"
 #define APPSK "thereisnospoon"
 
 const char *ssid = APSSID;
 const char *password = APPSK;
-const char *host = "esp2";
 
 ESP8266WebServer server(80);
 
-IPAddress ipstore, unset;
+IPAddress ServerIP, unset;
 bool ipStored = false;
 String str = "Hello World";
 String ssidnew, psknew;
@@ -40,7 +39,60 @@ char strvar[101];
 bool serverRun = true;
 bool showPassword = false;
 
-#define LED_Pin D4
+#define LEDpin D4
+String LEDstatus = "off";
+
+unsigned long currentMillis = 0;
+unsigned long lastConnectionAttempt = 0;
+const unsigned long connectionAttemptInterval = 5000; // Connection attempt interval (in milliseconds)
+
+WiFiClient client;
+
+
+void setup() {
+  EEPROMr.size(4);
+  EEPROMr.begin(4096);
+  Serial.begin(115200);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  delay(200);
+
+  pinMode(LEDpin, OUTPUT);
+  digitalWrite(LEDpin, 0);
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  readall();
+
+  delay(500);
+  WiFi.begin(ssidnew, psknew);
+
+  reconnect1(0);
+
+  reconnectToServer();                                // Connect to the TCP/IP Masterdevice
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+}
+
+void loop() {
+  currentMillis = millis();
+  if (!client.connected()) {                          // If connection is lost, reconnect to server
+    if (currentMillis - lastConnectionAttempt >= connectionAttemptInterval) {
+      reconnectToServer();
+    }
+  } else {
+    handleServerCommunication();
+  }
+
+  if (WiFi.status() != WL_CONNECTED) {  //reeconeting falls verbindungsabbruch
+    reconnect1(1);
+  }
+  delay(200);
+}
 
 void handleRoot() { //Root handler for Access Point
   String message = "<html><head><title>Configuration Page</title>";
@@ -55,10 +107,10 @@ void handleRoot() { //Root handler for Access Point
   message += "}";
   message += "</script></head>";
 
-  message += "<body><h1>Configuration Page</h1>";
+  message += "<body><h1>Configuration Page ESP2</h1>";
   message += "<h3>Enter IP Address of ESP1:</h3>";
   message += "<form action='/sub' method='get'>";
-  message += "<input type='text' name='ip' value='" + ipstore.toString() + "'>";
+  message += "<input type='text' name='ip' value='" + ServerIP.toString() + "'>";
 
   message += "<h3>Enter ssid:</h3>";
   message += "<input type='text' name='ssid' value='" + ssidnew + "' placeholder='(ssid unset)'>";
@@ -86,7 +138,7 @@ void handlesub() {  //submites all written values into variables
   String ip = server.arg("ip");
   if (ip.length() > 0) {
     Serial.println("Received IP: " + ip);
-    if (ipstore.fromString(ip)) {
+    if (ServerIP.fromString(ip)) {
       Serial.println("IP Address stored successfully.");
     } else {
       Serial.println("Invalid IP Address format for IP.");
@@ -125,7 +177,7 @@ void handleclose() {  //stops the Access Point mode and stores variables in EEPR
 
   message += "<body><h3>Enter IP Address to store:</h3>";
   message += "<form action='/sub' method='get'>";
-  message += "<input type='text' name='ip' value='" + ipstore.toString() + "'>";
+  message += "<input type='text' name='ip' value='" + ServerIP.toString() + "'>";
 
   message += "<h3>Enter ssid:</h3>";
   message += "<input type='text' name='ssid' value='" + ssidnew + "' placeholder='(ssid unset)'>";
@@ -141,9 +193,9 @@ void handleclose() {  //stops the Access Point mode and stores variables in EEPR
   server.send(200, "text/html", message);
 
   int i;
-  if (ipstore != unset) {
+  if (ServerIP != unset) {
     for (i = 0; i < 4; i++) {
-      EEPROMr.write(DATA_OFFSET + i, ipstore[i]);
+      EEPROMr.write(DATA_OFFSET + i, ServerIP[i]);
     }
     delay(100);
   }
@@ -180,7 +232,7 @@ void readall() {  //reads values for Variables from EEPROM
 
   int i, j;
   for (i = 0; i < 4; i++) {
-    ipstore[i] = EEPROMr.read(DATA_OFFSET + i);
+    ServerIP[i] = EEPROMr.read(DATA_OFFSET + i);
   }
   i = 0;
   j = 0;
@@ -253,7 +305,7 @@ void APmode() { //Access Point mode
 
 void reconnect1(int state) {  //if not reconnect, then go back in Access Point mode
   int i = 0;
-  int minToAccessPointMode = 3;      
+  int minToAccessPointMode = 3;
   display.clearDisplay();
   display.setCursor(0, 0); // Set the cursor after clearing the display
   switch (state) {
@@ -280,7 +332,6 @@ void reconnect1(int state) {  //if not reconnect, then go back in Access Point m
       display.println("Connection failure");
       display.display();
       delay(1000);
-      //ESP.restart();
       APmode();
     }
     i++;
@@ -293,37 +344,33 @@ void reconnect1(int state) {  //if not reconnect, then go back in Access Point m
 
 }
 
-void setup() {
-  EEPROMr.size(4);
-  EEPROMr.begin(4096);
-  Serial.begin(115200);
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  delay(200);
-
-  pinMode(LED_Pin, OUTPUT);
-  digitalWrite(LED_Pin, 0);
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  readall();
-
-  delay(500);
-  WiFi.begin(ssidnew, psknew);
-
-  reconnect1(0);
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
+void reconnectToServer() {  //reconnect to TCP/IP Masterdevice
+  Serial.println("Attempting to reconnect to the server...");
+  // Verbindung zum Server herstellen
+  if (client.connect(ServerIP, 40)) {
+    Serial.println("Connected to the server.");
+  } else {
+    Serial.println("Connection to server failed.");
+  }
+  lastConnectionAttempt = millis();
 }
 
-void loop() {
- /// TCP/IP
-  if (WiFi.status() != WL_CONNECTED) {  //reeconeting falls verbindungsabbruch
-    reconnect1(1);
+void handleServerCommunication() {  //read TCP/IP and respondes
+  if (client.available()) {                           // Message from server
+    String request = client.readStringUntil('\r');
+
+    if (request.length() > 0) {                       // Verify that data has been received
+      Serial.println("Nachricht vom Server: " + request);
+      if (request == "LED high") {
+        digitalWrite(LEDpin, HIGH);
+        LEDstatus = "on";
+        client.print("LED is " + LEDstatus + '\r');  // Send response to server
+      } else if (request == "LED low") {
+        digitalWrite(LEDpin, LOW);
+        LEDstatus = "off";
+        client.print("LED is " + LEDstatus + '\r');
+      }
+      request = "";
+    }
   }
-  delay(200);
 }
