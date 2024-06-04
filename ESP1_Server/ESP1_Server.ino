@@ -15,7 +15,7 @@ unsigned long startTime;
 #include <WiFiClient.h>
 #include <ESP8266mDNS.h>
 
-#define OLED_RESET 0  // GPIO0
+#define OLED_RESET 0                       // GPIO0
 Adafruit_SSD1306 display(OLED_RESET);
 
 #define NUMFLAKES 10
@@ -48,13 +48,13 @@ bool showPassword = false;
 bool wifiBool = true;
 bool autoIPassignBool = false;
 
-// RFID TCP/IP
-WiFiServer tcpServer(40);             // Server Port
+// TCP/IP
+WiFiServer tcpServer(40);                  // TCP/IP Server Port
 int clientnumber;
 const byte maxClientNumber = 5;
 IPAddress clientIP[maxClientNumber];
 WiFiClient clients[maxClientNumber];
-bool lock = true;
+bool lockStatusBool = true;
 String lockStatus;
 
 bool sendLedHigh = false;                  // Variable to initiate LED high request
@@ -94,9 +94,9 @@ byte len = 18;
 bool rfidReadyMessageDisplayed = false;    // Variable to track if the RFID ready message was displayed
 
 
-void handleRoot() { //Root handler for Wifi and Access Point connection || Wifi + AP
+void handleRoot() {                        // Root handler for Wifi and Access Point connection || Wifi + AP
   String message = "<html><head>";
-  if (wifiBool) { //wifi mode
+  if (wifiBool) {                          // WiFi mode
     message += "<meta charset='UTF-8'>";
     message += "<title>Doorlock.web</title>";
     message += "<script>";
@@ -161,13 +161,13 @@ void handleRoot() { //Root handler for Wifi and Access Point connection || Wifi 
   httpServer.send(200, "text/html", message);
 }
 
-void handleShowPassword() { //switch bool to show/unshow Password || AP
+void handleShowPassword() {                // Switch bool to show/unshow Password || AP
   showPassword = !showPassword;
   httpServer.sendHeader("Location", "/", true);
   httpServer.send(303);
 }
 
-void handlesub() {  //submites all written values into variables || AP
+void handlesub() {                         // Submites all written values into variables || AP
   str = "Storing successful";
   String ip = httpServer.arg("ip");
   if (ip.length() > 0) {
@@ -195,7 +195,7 @@ void handlesub() {  //submites all written values into variables || AP
   httpServer.send(303);
 }
 
-void handleclose() {  //stops the Access Point mode and switch to Wifi mode || stores variables in EEPROM || AP
+void handleclose() {                       // Stops the Access Point mode and switch to Wifi mode || stores variables in EEPROM || AP
   String message = "<html><head>";
   message += "<meta http-equiv='refresh' content='10'>";
   message += "<script>";
@@ -261,7 +261,7 @@ void handleclose() {  //stops the Access Point mode and switch to Wifi mode || s
   srun = false;
 }
 
-void readall() {  //reads values for Variables from EEPROM
+void readAll() {                           // Reads values for Variables from EEPROM
   int i, j;
   for (i = 0; i < 4; i++) {
     ServerIP[i] = EEPROMr.read(DATA_OFFSET + i);
@@ -300,12 +300,12 @@ void readall() {  //reads values for Variables from EEPROM
   }
 }
 
-void handleGetLockStatus() {  //let the Website Autorenew the Lockstate || Wifi
-  lockStatus = lock ? "locked" : "unlocked";
+void handleGetLockStatus() {               // Let the Website Autorenew the Lockstate || Wifi
+  lockStatus = lockStatusBool ? "locked" : "unlocked";
   httpServer.send(200, "text/plain", lockStatus);
 }
 
-void handleIPrenew () { //loads new list of connected Clients || Wifi
+void handleIPrenew () {                          // Loads new list of connected Clients || Wifi
   clientnumber = 0;
   for (int i = 0; i < maxClientNumber; i++) {
     if (clients[i] && clients[i].connected()) {
@@ -313,16 +313,16 @@ void handleIPrenew () { //loads new list of connected Clients || Wifi
       clientnumber++;
     }
   }
-  httpServer.sendHeader("Location", "/", true);   // Redirect to root page
-  httpServer.send(303);  // Send response with redirect
+  httpServer.sendHeader("Location", "/", true);  // Redirect to root page
+  httpServer.send(303);                          // Send response with redirect
 }
 
-void handleAP() { //goes into Access Point mode || Wifi to AP
+void handleAP() {                           // Goes into Access Point mode || Wifi to AP
   APmode();
   reconnect1(1);
 }
 
-void handleautoIPassign() { //let the DHCP assign the IP-Address || AP to Wifi
+void handleAutoIPassign() {                 // Let the DHCP assign the IP-Address || AP to Wifi
   autoIPassignBool = true;
 
   WiFi.softAPdisconnect(true);
@@ -344,7 +344,7 @@ void handleautoIPassign() { //let the DHCP assign the IP-Address || AP to Wifi
   gateway[3] = 1;
 
   byte i;
-    for  (i = 0; i < 4; i++) {
+  for  (i = 0; i < 4; i++) {
     EEPROMr.write(DATA_OFFSET + i, ServerIP[i]);
   }
   if (ssidnew.length() != 0) {
@@ -369,7 +369,7 @@ void handleautoIPassign() { //let the DHCP assign the IP-Address || AP to Wifi
   EEPROMr.commit();
 }
 
-void APmode() { //Access Point mode
+void APmode() {                             // Access Point mode
   wifiBool = false;
   WiFi.softAP(ssid);
   Serial.println();
@@ -391,7 +391,7 @@ void APmode() { //Access Point mode
     httpServer.handleClient();
     if (WiFi.softAPgetStationNum() == 0 && angemeldet) {
       angemeldet = false;
-      startTime = millis(); //setzt Startzeit
+      startTime = millis();                 // Sets start time
     } else if (WiFi.softAPgetStationNum() > 0 && !angemeldet) {
       angemeldet = true;
     } else if ((millis() - startTime) > (2 * 60 * 1000) && !angemeldet) {
@@ -409,7 +409,7 @@ void APmode() { //Access Point mode
     display.display();
     delay(500);
 
-    //new IP assurence
+    // New IP assurance
     gateway = ServerIP;
     gateway[3] = 1;
     if (ServerIP != unset && ServerIP != gateway) WiFi.config(ServerIP, gateway, subnet);
@@ -417,7 +417,7 @@ void APmode() { //Access Point mode
   autoIPassignBool = false;
 }
 
-void operatingproof() { //checks, if static IP is working with the Network
+void operatingProof() {                     // Check, if static IP is working with the Network
   if (Ping.ping(gateway)) {
     Serial.println("Ping successful, static IP is operable");
   } else {
@@ -427,12 +427,12 @@ void operatingproof() { //checks, if static IP is working with the Network
   }
 }
 
-void reconnect1(int s) {  //if not reconnect, then go back in Access Point mode
-  readall();
+void reconnect1(int s) {                    // If not reconnect, then go back in Access Point mode
+  readAll();
   int i = 0;
   int minToAccessPointMode = 3;
   display.clearDisplay();
-  display.setCursor(0, 0);  //Set the cursor after clearing the display
+  display.setCursor(0, 0);                  // Set the cursor after clearing the display
   switch (s) {
     case 0:
       display.println("Connecting");
@@ -445,13 +445,13 @@ void reconnect1(int s) {  //if not reconnect, then go back in Access Point mode
       display.println("u r a Failure");
       break;
   }
-  display.display(); // Update the display with the new content
+  display.display();                        // Update the display with the new content
 
   display.setTextColor(WHITE);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
-    if (i == (minToAccessPointMode * 60)) { // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
+    if (i == (minToAccessPointMode * 60)) {  // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
       display.clearDisplay();
       display.setCursor(0, 0);
       display.println("Connection failure");
@@ -461,10 +461,10 @@ void reconnect1(int s) {  //if not reconnect, then go back in Access Point mode
     }
     i++;
   }
-  operatingproof();
+  operatingProof();
 }
 
-void tcploop() {
+void tcpLoop() {
   // Accept new clients
   if (tcpServer.hasClient()) {
     for (byte i = 0; i < maxClientNumber; i++) {
@@ -481,8 +481,8 @@ void tcploop() {
     }
   }
 
-  // Counts the connected clients
-  byte connectedClients = 0;
+  
+  byte connectedClients = 0;                // Counts the connected clients
   for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i]) {
       if (clients[i].connected()) {
@@ -503,19 +503,16 @@ void tcploop() {
       readRFIDcard();
     }
 
-    // Send "LED high" to all connected clients
-    if (sendLedHigh) {
+    if (sendLedHigh) {                      // Send "LED high" to all connected clients
       sendLedHighToClients();
       lastSetTime = millis();
     }
 
-    // Send "LED low" to all connected clients
-    if (sendLedLow) {
+    if (sendLedLow) {                       // Send "LED low" to all connected clients
       sendLedLowToClients();
     }
 
-    // Process responses from clients
-    if (waitingForResponse) {
+    if (waitingForResponse) {               // Process responses from clients
       bool allClientsResponded = true;
       for (byte i = 0; i < maxClientNumber; i++) {
         if (clients[i] && clients[i].connected()) {
@@ -547,7 +544,7 @@ void tcploop() {
           LEDstatus = "low";
         }
         Serial.println("All clients confirmed LED status");
-        waitingForResponse = false;   // Stop waiting for responses
+        waitingForResponse = false;         // Stop waiting for responses
         resendCount = 0;
         rfidReadyMessageDisplayed = false;
       } else if (millis() - lastSendTime >= resendInterval) {   // Resending LED status
@@ -563,7 +560,7 @@ void tcploop() {
         } else {
           Serial.println("Client doesn't respond");
           //Serial.println();
-          waitingForResponse = false; // Stop waiting after max attempts
+          waitingForResponse = false;       // Stop waiting after max attempts
           resendCount = 0;
           rfidReadyMessageDisplayed = false;
         }
@@ -574,10 +571,10 @@ void tcploop() {
     rfidReadyMessageDisplayed = false;
     Serial.println("Error no clients connected");
   }
-  // LED auf off reseten
+  
   currentMillis = millis();
   delay(200);
-  if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {
+  if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {  // LED auf off reseten
     sendLedLowToClients();
     //waitingForResponse = true;
     lastSetTime = millis();
@@ -610,9 +607,8 @@ void sendLedLowToClients() {
   expectedResponse = "LED is off";
 }
 
-// RFID
 void readRFIDcard() {
-  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));   // Test dumps all data from RFID card
+  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));  // Test dumps all data from RFID card
 
   Serial.println("Reading from RFID card...");
   Serial.print("Card UID: ");
@@ -677,9 +673,9 @@ void setup() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  readall();
+  readAll();
 
-  lockStatus = lock ? "locked" : "unlocked";
+  lockStatus = lockStatusBool ? "locked" : "unlocked";
 
   delay(500);
   gateway = ServerIP;
@@ -699,12 +695,12 @@ void setup() {
   httpServer.on("/showPassword", handleShowPassword);
   httpServer.on("/sub", handlesub);
   httpServer.on("/close", handleclose);
-  httpServer.on("/autoIPassign", handleautoIPassign);
+  httpServer.on("/autoIPassign", handleAutoIPassign);
   httpServer.begin();
 
   reconnect1(0);
 
-  tcpServer.begin();                          // Starts the server
+  tcpServer.begin();                        // Starts the TCP server
 
   Serial.println("");
   Serial.println("WiFi connected and TCP-Server started");
@@ -713,28 +709,27 @@ void setup() {
 
   // RFID
   SPI.begin();
-  mfrc522.PCD_Init();                      // Starting the RFID sensor
+  mfrc522.PCD_Init();                       // Starting the RFID sensor
   delay(4);
-  for (byte i = 0; i < 6; i++)key.keyByte[i] = authenticationKey[i]; //Key festlegen
+  for (byte i = 0; i < 6; i++)key.keyByte[i] = authenticationKey[i];  // Set key
 }
 
 void loop() {
-  // TCP/IP
-  tcploop();
+  tcpLoop();
 
   httpServer.handleClient();
 
-  if (WiFi.status() != WL_CONNECTED) {  //reeconeting falls verbindungsabbruch
+  if (WiFi.status() != WL_CONNECTED) {      // Reconnect if connection is lost
     reconnect1(1);
   }
 
-  lock = (LEDstatus == "low") ? true : false;
+  lockStatusBool = (LEDstatus == "low") ? true : false;
   display.clearDisplay();
   display.setCursor(0, 0);
   display.println("Connected");
   display.println(WiFi.localIP());
   display.setCursor(0, 40);
-  display.println(lock ? "locked" : "unlocked");
+  display.println(lockStatusBool ? "locked" : "unlocked");
   display.display();
   delay(200);
 }

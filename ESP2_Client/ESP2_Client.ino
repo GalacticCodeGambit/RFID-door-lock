@@ -39,7 +39,7 @@ char strvar[101];
 bool serverRun = true;
 bool showPassword = false;
 
-#define LEDpin D4
+const byte LEDpin = D4;
 String LEDstatus = "off";
 
 unsigned long currentMillis = 0;
@@ -62,25 +62,24 @@ void setup() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  readall();
+  readAll();
 
   delay(500);
   WiFi.begin(ssidnew, psknew);
 
   reconnect1(0);
 
-  reconnectToServer();                                // Connect to the TCP/IP Masterdevice
+  reconnectToServer();                       // Connect to the TCP/IP Masterdevice
 
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
 }
 
 void loop() {
   currentMillis = millis();
-  if (!client.connected()) {                          // If connection is lost, reconnect to server
+  if (!client.connected()) {                 // If connection is lost, reconnect to server
     if (currentMillis - lastConnectionAttempt >= connectionAttemptInterval) {
       reconnectToServer();
     }
@@ -88,13 +87,13 @@ void loop() {
     handleServerCommunication();
   }
 
-  if (WiFi.status() != WL_CONNECTED) {  //reeconeting falls verbindungsabbruch
+  if (WiFi.status() != WL_CONNECTED) {       // Reconnect if connection is lost
     reconnect1(1);
   }
   delay(200);
 }
 
-void handleRoot() { //Root handler for Access Point
+void handleRoot() {                          // Root handler for Access Point
   String message = "<html><head><title>Configuration Page</title>";
   message += "<script>";
   message += "function togglePassword() {";
@@ -128,13 +127,13 @@ void handleRoot() { //Root handler for Access Point
   server.send(200, "text/html", message);
 }
 
-void handleShowPassword() { //switch bool to show/unshow Password
+void handleShowPassword() {                  // Switch bool to show/unshow Password
   showPassword = !showPassword;
   server.sendHeader("Location", "/", true);
   server.send(303);
 }
 
-void handlesub() {  //submites all written values into variables
+void handlesub() {                           // Submites all written values into variables
   String ip = server.arg("ip");
   if (ip.length() > 0) {
     Serial.println("Received IP: " + ip);
@@ -161,7 +160,7 @@ void handlesub() {  //submites all written values into variables
   server.send(303);
 }
 
-void handleclose() {  //stops the Access Point mode and stores variables in EEPROM
+void handleclose() {                         // Stops the Access Point mode and stores variables in EEPROM
   String message = "<html><head>";
   message += "<meta http-equiv='refresh' content='10'>";
   message += "<script>";
@@ -228,8 +227,7 @@ void handleclose() {  //stops the Access Point mode and stores variables in EEPR
   serverRun = false;
 }
 
-void readall() {  //reads values for Variables from EEPROM
-
+void readAll() {                             // Reads values for Variables from EEPROM
   int i, j;
   for (i = 0; i < 4; i++) {
     ServerIP[i] = EEPROMr.read(DATA_OFFSET + i);
@@ -268,7 +266,7 @@ void readall() {  //reads values for Variables from EEPROM
   }
 }
 
-void APmode() { //Access Point mode
+void APmode() {                              // Access Point mode
   WiFi.softAP(ssid);
   Serial.println();
 
@@ -303,11 +301,11 @@ void APmode() { //Access Point mode
 
 }
 
-void reconnect1(int state) {  //if not reconnect, then go back in Access Point mode
+void reconnect1(int state) {                 // If not reconnect, then go back in Access Point mode
   int i = 0;
   int minToAccessPointMode = 3;
   display.clearDisplay();
-  display.setCursor(0, 0); // Set the cursor after clearing the display
+  display.setCursor(0, 0);                   // Set the cursor after clearing the display
   switch (state) {
     case 0:
       display.println("Connecting");
@@ -320,13 +318,13 @@ void reconnect1(int state) {  //if not reconnect, then go back in Access Point m
       display.println("u r a Failure");
       break;
   }
-  display.display(); // Update the display with the new content
+  display.display();                         // Update the display with the new content
 
   display.setTextColor(WHITE);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
-    if (i == (minToAccessPointMode * 60)) { // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
+    if (i == (minToAccessPointMode * 60)) {  // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
       display.clearDisplay();
       display.setCursor(0, 0);
       display.println("Connection failure");
@@ -344,7 +342,7 @@ void reconnect1(int state) {  //if not reconnect, then go back in Access Point m
 
 }
 
-void reconnectToServer() {  //reconnect to TCP/IP Masterdevice
+void reconnectToServer() {                   // Reconnect to TCP/IP Masterdevice
   Serial.println("Attempting to reconnect to the server...");
   // Verbindung zum Server herstellen
   if (client.connect(ServerIP, 40)) {
@@ -355,11 +353,11 @@ void reconnectToServer() {  //reconnect to TCP/IP Masterdevice
   lastConnectionAttempt = millis();
 }
 
-void handleServerCommunication() {  //read TCP/IP and respondes
-  if (client.available()) {                           // Message from server
+void handleServerCommunication() {                   // Read TCP/IP and respondes
+  if (client.available()) {                          // Message from server
     String request = client.readStringUntil('\r');
 
-    if (request.length() > 0) {                       // Verify that data has been received
+    if (request.length() > 0) {                      // Verify that data has been received
       Serial.println("Nachricht vom Server: " + request);
       if (request == "LED high") {
         digitalWrite(LEDpin, HIGH);
