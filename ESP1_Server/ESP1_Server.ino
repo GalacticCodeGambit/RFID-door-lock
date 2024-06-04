@@ -492,7 +492,6 @@ void tcpLoop() {
     }
   }
 
-
   byte connectedClients = 0;                // Counts the connected clients
   for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i]) {
@@ -554,7 +553,6 @@ void tcpLoop() {
             sendLedHighToClients();
           } else if (expectedResponse == "LED is off") {
             debugln("Resending LED status low to clients...");
-            //debugln("Send low to Clients");
             sendLedLowToClients();
           }
           lastSendTime = millis();
@@ -567,19 +565,17 @@ void tcpLoop() {
         }
       }
     }
-    currentMillis = millis();
-    if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {  // LED auf off reseten
-      debugln("Send low to Clients");
-      sendLedLowToClients();
-      lastSetTime = millis();
-    }
   } else {
     delay(1000);
     rfidReadyMessageDisplayed = false;
     debugln("Error no clients connected");
   }
-
-
+  currentMillis = millis();
+  if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {  // LED auf off reseten
+    debugln("Send low to Clients");
+    sendLedLowToClients();
+    lastSetTime = millis();
+  }
 }
 
 
@@ -720,9 +716,9 @@ void loop() {
   if (WiFi.status() != WL_CONNECTED) {      // Reconnect if connection is lost
     reconnect1(1);
   }
-  
+
   tcpLoop();
-  
+
   lockStatusBool = (LEDstatus == "low") ? true : false;
   display.clearDisplay();
   display.setCursor(0, 0);

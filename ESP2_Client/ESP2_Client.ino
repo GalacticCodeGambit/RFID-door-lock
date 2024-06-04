@@ -95,9 +95,9 @@ void loop() {
     if (currentMillis - lastConnectionAttempt >= connectionAttemptInterval) {
       reconnectToServer();
     }
-  } else {
-    handleServerCommunication();
   }
+  handleServerCommunication();
+
 
   if (WiFi.status() != WL_CONNECTED) {       // Reconnect if connection is lost
     reconnect1(1);
