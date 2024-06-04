@@ -1,3 +1,15 @@
+/***************/
+#define DEBUG 1                              // To enable serial output, set debug equal to 1, to disable set it to not equal 1
+
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
+/***************/
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -12,7 +24,7 @@ EEPROM_Rotate EEPROMr;
 #include <WiFiClient.h>
 #include <ESP8266mDNS.h>
 
-#define OLED_RESET 0  // GPIO0
+#define OLED_RESET 0                         // GPIO0
 Adafruit_SSD1306 display(OLED_RESET);
 
 #define NUMFLAKES 10
@@ -71,10 +83,10 @@ void setup() {
 
   reconnectToServer();                       // Connect to the TCP/IP Masterdevice
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  debugln("");
+  debugln("WiFi connected");
+  debugln("IP address: ");
+  debugln(WiFi.localIP());
 }
 
 void loop() {
@@ -136,14 +148,14 @@ void handleShowPassword() {                  // Switch bool to show/unshow Passw
 void handlesub() {                           // Submites all written values into variables
   String ip = server.arg("ip");
   if (ip.length() > 0) {
-    Serial.println("Received IP: " + ip);
+    debugln("Received IP: " + ip);
     if (ServerIP.fromString(ip)) {
-      Serial.println("IP Address stored successfully.");
+      debugln("IP Address stored successfully.");
     } else {
-      Serial.println("Invalid IP Address format for IP.");
+      debugln("Invalid IP Address format for IP.");
     }
   } else {
-    Serial.println("No IP address received for 'IP'.");
+    debugln("No IP address received for 'IP'.");
   }
 
   if (server.arg("ssid").length() > 0) {
@@ -268,11 +280,11 @@ void readAll() {                             // Reads values for Variables from 
 
 void APmode() {                              // Access Point mode
   WiFi.softAP(ssid);
-  Serial.println();
+  debugln();
 
   IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
+  debug("AP IP address: ");
+  debugln(myIP);
 
   display.clearDisplay();
   display.setCursor(0, 0);
@@ -285,7 +297,7 @@ void APmode() {                              // Access Point mode
   server.on("/sub", handlesub);
   server.on("/close", handleclose);
   server.begin();
-  Serial.println("HTTP server started");
+  debugln("HTTP server started");
 
   while (serverRun) {
     server.handleClient();
@@ -323,7 +335,7 @@ void reconnect1(int state) {                 // If not reconnect, then go back i
   display.setTextColor(WHITE);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.print(".");
+    debug(".");
     if (i == (minToAccessPointMode * 60)) {  // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
       display.clearDisplay();
       display.setCursor(0, 0);
@@ -342,13 +354,12 @@ void reconnect1(int state) {                 // If not reconnect, then go back i
 
 }
 
-void reconnectToServer() {                   // Reconnect to TCP/IP Masterdevice
-  Serial.println("Attempting to reconnect to the server...");
-  // Verbindung zum Server herstellen
-  if (client.connect(ServerIP, 40)) {
-    Serial.println("Connected to the server.");
+void reconnectToServer() {                           // Reconnect to TCP/IP Masterdevice
+  debugln("Attempting to reconnect to the server...");
+  if (client.connect(ServerIP, 40)) {                // Verbindung zum Server herstellen
+    debugln("Connected to the server.");
   } else {
-    Serial.println("Connection to server failed.");
+    debugln("Connection to server failed.");
   }
   lastConnectionAttempt = millis();
 }
@@ -358,7 +369,7 @@ void handleServerCommunication() {                   // Read TCP/IP and responde
     String request = client.readStringUntil('\r');
 
     if (request.length() > 0) {                      // Verify that data has been received
-      Serial.println("Nachricht vom Server: " + request);
+      debugln("Nachricht vom Server: " + request);
       if (request == "LED high") {
         digitalWrite(LEDpin, HIGH);
         LEDstatus = "on";

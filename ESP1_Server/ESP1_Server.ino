@@ -1,3 +1,16 @@
+/***************/
+#define DEBUG 1                            // To enable serial output, set debug equal to 1, to disable set it to not equal 1
+
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#define debugHEX(x) Serial.print(x, HEX)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
+/***************/
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -57,8 +70,6 @@ WiFiClient clients[maxClientNumber];
 bool lockStatusBool = true;
 String lockStatus;
 
-bool sendLedHigh = false;                  // Variable to initiate LED high request
-bool sendLedLow = false;                   // Variable to initiate LED low request
 String LEDstatus = "low";                  // Current status of LED
 
 unsigned long currentMillis = 0;
@@ -171,15 +182,15 @@ void handlesub() {                         // Submites all written values into v
   str = "Storing successful";
   String ip = httpServer.arg("ip");
   if (ip.length() > 0) {
-    Serial.println("Received IP: " + ip);
+    debugln("Received IP: " + ip);
     if (ServerIP.fromString(ip)) {
-      Serial.println("IP Address stored successfully.");
+      debugln("IP Address stored successfully.");
     } else {
-      Serial.println("Invalid IP Address format for IP.");
+      debugln("Invalid IP Address format for IP.");
     }
 
   } else {
-    Serial.println("No IP address received for 'IP'.");
+    debugln("No IP address received for 'IP'.");
   }
 
   if (httpServer.arg("ssid").length() > 0) {
@@ -372,11 +383,11 @@ void handleAutoIPassign() {                 // Let the DHCP assign the IP-Addres
 void APmode() {                             // Access Point mode
   wifiBool = false;
   WiFi.softAP(ssid);
-  Serial.println();
+  debugln();
 
   IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
+  debug("AP IP address: ");
+  debugln(myIP);
 
   display.clearDisplay();
   display.setCursor(0, 0);
@@ -384,7 +395,7 @@ void APmode() {                             // Access Point mode
   display.println(myIP);
   display.display();
 
-  Serial.println("HTTP server started");
+  debugln("HTTP server started");
 
   bool angemeldet = true;
   while (srun) {
@@ -418,10 +429,11 @@ void APmode() {                             // Access Point mode
 }
 
 void operatingProof() {                     // Check, if static IP is working with the Network
+  debugln();
   if (Ping.ping(gateway)) {
-    Serial.println("Ping successful, static IP is operable");
+    debugln("Ping successful, static IP is operable");
   } else {
-    Serial.println("Ping failed, static IP is not operable");
+    debugln("Ping failed, static IP is not operable");
     str = "Ping failed, static IP is not operable";
     APmode();
   }
@@ -450,7 +462,7 @@ void reconnect1(int s) {                    // If not reconnect, then go back in
   display.setTextColor(WHITE);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.print(".");
+    debug(".");
     if (i == (minToAccessPointMode * 60)) {  // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
       display.clearDisplay();
       display.setCursor(0, 0);
@@ -465,23 +477,22 @@ void reconnect1(int s) {                    // If not reconnect, then go back in
 }
 
 void tcpLoop() {
-  // Accept new clients
-  if (tcpServer.hasClient()) {
+  if (tcpServer.hasClient()) {              // Accept new clients
     for (byte i = 0; i < maxClientNumber; i++) {
-      // Freier Slot finden
+      // Find a free slot
       if (!clients[i] || !clients[i].connected()) {
         if (clients[i]) {
           clients[i].stop();
         }
         clients[i] = tcpServer.available();
-        Serial.print("New client connected, ID: ");
-        Serial.println(i);
+        debug("New client connected, ID: ");
+        debugln(i);
         break;
       }
     }
   }
 
-  
+
   byte connectedClients = 0;                // Counts the connected clients
   for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i]) {
@@ -495,21 +506,12 @@ void tcpLoop() {
 
   if (connectedClients != 0) {
     if (!rfidReadyMessageDisplayed) {
-      Serial.println("\nRFID-Reader ready to read...\n\n");
+      debugln("\nRFID-Reader ready to read...\n\n");
       rfidReadyMessageDisplayed = true;
     }
-    // Starts reading as soon as a card is placed
-    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {  // Starts reading as soon as a card is placed
       readRFIDcard();
-    }
-
-    if (sendLedHigh) {                      // Send "LED high" to all connected clients
-      sendLedHighToClients();
-      lastSetTime = millis();
-    }
-
-    if (sendLedLow) {                       // Send "LED low" to all connected clients
-      sendLedLowToClients();
     }
 
     if (waitingForResponse) {               // Process responses from clients
@@ -518,15 +520,13 @@ void tcpLoop() {
         if (clients[i] && clients[i].connected()) {
           if (clients[i].available()) {
             String response = clients[i].readStringUntil('\r');
-            //Serial.println();
-            Serial.println("Client " + String(i) + " says: " + String(response));
+            debugln("Client " + String(i) + " says: " + String(response));
             clients[i].flush();
-
             if (response == expectedResponse) {
-              Serial.println("Client " + String(i) + " confirmed LED status");
+              debugln("Client " + String(i) + " confirmed LED status");
             } else if (response == "LED is off") {
               LEDstatus = "low";
-              Serial.println("Client " + String(i) + " confirmed LED is off");
+              debugln("Client " + String(i) + " confirmed LED is off");
             }
             else {
               allClientsResponded = false;
@@ -543,65 +543,64 @@ void tcpLoop() {
         } else if (expectedResponse == "LED is off") {
           LEDstatus = "low";
         }
-        Serial.println("All clients confirmed LED status");
+        debugln("All clients confirmed LED status");
         waitingForResponse = false;         // Stop waiting for responses
         resendCount = 0;
         rfidReadyMessageDisplayed = false;
       } else if (millis() - lastSendTime >= resendInterval) {   // Resending LED status
         if (resendCount < maxResendAttempts) {
-          Serial.println("Resending LED status to clients...");
           if (expectedResponse == "LED is on") {
+            debugln("Resending LED status high to clients...");
             sendLedHighToClients();
-          } else {
+          } else if (expectedResponse == "LED is off") {
+            debugln("Resending LED status low to clients...");
+            //debugln("Send low to Clients");
             sendLedLowToClients();
           }
           lastSendTime = millis();
           resendCount++;
         } else {
-          Serial.println("Client doesn't respond");
-          //Serial.println();
+          debugln("Client doesn't respond");
           waitingForResponse = false;       // Stop waiting after max attempts
           resendCount = 0;
           rfidReadyMessageDisplayed = false;
         }
       }
     }
+    currentMillis = millis();
+    if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {  // LED auf off reseten
+      debugln("Send low to Clients");
+      sendLedLowToClients();
+      lastSetTime = millis();
+    }
   } else {
     delay(1000);
     rfidReadyMessageDisplayed = false;
-    Serial.println("Error no clients connected");
+    debugln("Error no clients connected");
   }
-  
-  currentMillis = millis();
-  delay(200);
-  if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {  // LED auf off reseten
-    sendLedLowToClients();
-    //waitingForResponse = true;
-    lastSetTime = millis();
-    Serial.println("Send low to Clients");
-  }
+
+
 }
 
 
-void sendLedHighToClients() {
+void sendLedHighToClients() {               // Send "LED high" to all connected clients
   for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i] && clients[i].connected()) {
       clients[i].print("LED high\r");
     }
   }
-  sendLedHigh = false;
   waitingForResponse = true;
   lastSendTime = millis();
   expectedResponse = "LED is on";
+  lastSetTime = millis();
 }
 
-void sendLedLowToClients() {
+void sendLedLowToClients() {                // Send "LED low" to all connected clients
   for (byte i = 0; i < maxClientNumber; i++) {
     if (clients[i] && clients[i].connected()) {
       clients[i].print("LED low\r");
     }
   }
-  sendLedLow = false;
   waitingForResponse = true;
   lastSendTime = millis();
   expectedResponse = "LED is off";
@@ -610,51 +609,52 @@ void sendLedLowToClients() {
 void readRFIDcard() {
   //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));  // Test dumps all data from RFID card
 
-  Serial.println("Reading from RFID card...");
-  Serial.print("Card UID: ");
+  debugln("Reading from RFID card...");
+  debug("Card UID: ");
   for (byte i = 0; i < mfrc522.uid.size; i++) {
-    Serial.print(mfrc522.uid.uidByte[i], HEX);
-    Serial.print(" ");
+    debugHEX(mfrc522.uid.uidByte[i]);
+    debug(" ");
   }
-  Serial.print("  |  PICC type: ");
+  debug("  |  PICC type: ");
   MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);  // Model of the RFID card
-  Serial.println(mfrc522.PICC_GetTypeName(piccType));
+  debugln(mfrc522.PICC_GetTypeName(piccType));
 
   status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, dataKeyBlockNumber, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK) {
-    Serial.print("Authentication failed for Read: ");
-    Serial.println(mfrc522.GetStatusCodeName(status));
+    debug("Authentication failed for Read: ");
+    debugln(mfrc522.GetStatusCodeName(status));
     return;
   } else {
-    Serial.println("Authentication success");
+    debugln("Authentication success");
   }
 
   status = mfrc522.MIFARE_Read(dataKeyBlockNumber, readData, &len);
   if (status != MFRC522::STATUS_OK) {
-    Serial.print("Reading failed: ");
-    Serial.println(mfrc522.GetStatusCodeName(status));
+    debug("Reading failed: ");
+    debugln(mfrc522.GetStatusCodeName(status));
     return;
   } else {
-    Serial.println("Block was read successfully");
-    Serial.println("Data in block " + String(dataKeyBlockNumber) + ":");
-    Serial.print(" -->");
+    debugln("Block was read successfully");
+    debugln("Data in block " + String(dataKeyBlockNumber) + ":");
+    debug(" -->");
     for (byte i = 0; i < 16; i++) {
-      Serial.print(readData[i] < 10 & 0x10 ? " 0" : " ");
-      Serial.print(readData[i], HEX);
+      debug(readData[i] < 10 & 0x10 ? " 0" : " ");
+      debugHEX(readData[i]);
     }
-    Serial.println();
+    debugln();
 
-    byte count = 0;
+    byte equalCount = 0;
     for (byte i = 0; i < 16; i++) {
       if (readData[i] == dataKey[i])
-        count++;
+        equalCount++;
     }
-    if (count == 16) {
-      sendLedHigh = true;
-      Serial.println("unlocked :-)");
-      Serial.println();
+    if (equalCount == 16) {
+      debugln("unlocked :-)");
+      debugln();
+      debugln("Send high to Clients");
+      sendLedHighToClients();
     } else {
-      Serial.println("incorrect RFID card :-(");
+      debugln("incorrect RFID card :-(");
       rfidReadyMessageDisplayed = false;
     }
   }
@@ -666,7 +666,7 @@ void setup() {
   EEPROMr.size(4);
   EEPROMr.begin(4096);
   Serial.begin(115200);
-  Serial.println();
+  debugln();
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   delay(200);
 
@@ -683,15 +683,15 @@ void setup() {
   if (ServerIP != unset && ServerIP != gateway) WiFi.config(ServerIP, gateway, subnet);
   WiFi.begin(ssidnew, psknew);
 
-  //wifi + AP mode
+  // WiFi + AP mode
   httpServer.on("/", handleRoot);
 
-  //wifi mode
+  // WiFi mode
   httpServer.on("/iprenew", handleIPrenew);
   httpServer.on("/getLockStatus", handleGetLockStatus);
   httpServer.on("/ap", handleAP);
 
-  //AP mode
+  // AP mode
   httpServer.on("/showPassword", handleShowPassword);
   httpServer.on("/sub", handlesub);
   httpServer.on("/close", handleclose);
@@ -702,10 +702,10 @@ void setup() {
 
   tcpServer.begin();                        // Starts the TCP server
 
-  Serial.println("");
-  Serial.println("WiFi connected and TCP-Server started");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  debugln();
+  debugln("WiFi connected and TCP-Server started");
+  debugln("IP address: ");
+  debugln(WiFi.localIP());
 
   // RFID
   SPI.begin();
@@ -715,14 +715,14 @@ void setup() {
 }
 
 void loop() {
-  tcpLoop();
-
   httpServer.handleClient();
 
   if (WiFi.status() != WL_CONNECTED) {      // Reconnect if connection is lost
     reconnect1(1);
   }
-
+  
+  tcpLoop();
+  
   lockStatusBool = (LEDstatus == "low") ? true : false;
   display.clearDisplay();
   display.setCursor(0, 0);
