@@ -27,3 +27,6 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 
 ## Connection Diagram
 <img width="419" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
+
+## Known problems
+- 
