@@ -1,5 +1,5 @@
 /***************/
-#define DEBUG 1                              // To enable serial output, set debug equal to 1, to disable set it to not equal 1
+#define DEBUG 1                              // To enable serial output, set debug equal to 1, to disable set it to anything else
 
 #if DEBUG == 1
 #define debug(x) Serial.print(x)

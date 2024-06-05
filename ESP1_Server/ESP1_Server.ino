@@ -1,5 +1,5 @@
 /***************/
-#define DEBUG 1                            // To enable serial output, set debug equal to 1, to disable set it to not equal 1
+#define DEBUG 1                            // To enable serial output, set debug equal to 1, to disable set it to anything else
 
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
@@ -44,17 +44,17 @@ Adafruit_SSD1306 display(OLED_RESET);
 const char *ssid = APSSID;
 const char *password = APPSK;
 
-ESP8266WebServer httpServer(80);
+ESP8266WebServer httpServerPort(80);
 
 IPAddress gateway;
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(8, 8, 8, 8);
 IPAddress secondaryDNS(8, 8, 4, 4);
 
-IPAddress ServerIP, unset;
+IPAddress serverIP, unset;
 bool ipStored = false;
 String str = "Hello World";
-String ssidnew, psknew;
+String ssidNew, psknew;
 char strvar[101];
 bool srun = true;
 bool showPassword = false;
@@ -62,7 +62,7 @@ bool wifiBool = true;
 bool autoIPassignBool = false;
 
 // TCP/IP
-WiFiServer tcpServer(40);                  // TCP/IP Server Port
+WiFiServer tcpServerPort(40);                  // TCP/IP Server Port
 int clientnumber;
 const byte maxClientNumber = 5;
 IPAddress clientIP[maxClientNumber];
@@ -73,7 +73,7 @@ String lockStatus;
 String LEDstatus = "low";                  // Current status of LED
 
 unsigned long currentMillis = 0;
-unsigned long lastSetTime = 0;
+unsigned long lastSetHighTime = 0;
 const unsigned long resetInterval = 5000;
 
 unsigned long lastSendTime = 0;
@@ -149,10 +149,10 @@ void handleRoot() {                        // Root handler for Wifi and Access P
     message += "<body><h1>Configuration Page ESP1</h1>";
     message += "<body><h3>Enter static IP Address for ESP1:</h3>";
     message += "<form action='/sub' method='get'>";
-    message += "<input type='text' name='ip' value='" + ServerIP.toString() + "'>";
+    message += "<input type='text' name='ip' value='" + serverIP.toString() + "'>";
 
     message += "<h3>Enter ssid:</h3>";
-    message += "<input type='text' name='ssid' value='" + ssidnew + "' placeholder='(ssid unset)'>";
+    message += "<input type='text' name='ssid' value='" + ssidNew + "' placeholder='(ssid unset)'>";
 
     message += "<h3>Enter Passkey:</h3>";
     message += "<input type='password' id='psk' name='psk' value='" + psknew + "' placeholder='(psk unset)'>";
@@ -169,21 +169,21 @@ void handleRoot() {                        // Root handler for Wifi and Access P
   }
   message += "</body></html>";
 
-  httpServer.send(200, "text/html", message);
+  httpServerPort.send(200, "text/html", message);
 }
 
 void handleShowPassword() {                // Switch bool to show/unshow Password || AP
   showPassword = !showPassword;
-  httpServer.sendHeader("Location", "/", true);
-  httpServer.send(303);
+  httpServerPort.sendHeader("Location", "/", true);
+  httpServerPort.send(303);
 }
 
 void handlesub() {                         // Submites all written values into variables || AP
   str = "Storing successful";
-  String ip = httpServer.arg("ip");
+  String ip = httpServerPort.arg("ip");
   if (ip.length() > 0) {
     debugln("Received IP: " + ip);
-    if (ServerIP.fromString(ip)) {
+    if (serverIP.fromString(ip)) {
       debugln("IP Address stored successfully.");
     } else {
       debugln("Invalid IP Address format for IP.");
@@ -193,17 +193,17 @@ void handlesub() {                         // Submites all written values into v
     debugln("No IP address received for 'IP'.");
   }
 
-  if (httpServer.arg("ssid").length() > 0) {
-    ssidnew = httpServer.arg("ssid");
+  if (httpServerPort.arg("ssid").length() > 0) {
+    ssidNew = httpServerPort.arg("ssid");
   }
-  if (httpServer.arg("psk").length() > 0) {
-    psknew = httpServer.arg("psk");
+  if (httpServerPort.arg("psk").length() > 0) {
+    psknew = httpServerPort.arg("psk");
   }
 
   ipStored = false;
 
-  httpServer.sendHeader("Location", "/", true);
-  httpServer.send(303);
+  httpServerPort.sendHeader("Location", "/", true);
+  httpServerPort.send(303);
 }
 
 void handleclose() {                       // Stops the Access Point mode and switch to Wifi mode || stores variables in EEPROM || AP
@@ -222,10 +222,10 @@ void handleclose() {                       // Stops the Access Point mode and sw
 
   message += "<body><h3>Enter IP Address to store:</h3>";
   message += "<form action='/sub' method='get'>";
-  message += "<input type='text' name='ip' value='" + ServerIP.toString() + "'>";
+  message += "<input type='text' name='ip' value='" + serverIP.toString() + "'>";
 
   message += "<h3>Enter ssid:</h3>";
-  message += "<input type='text' name='ssid' value='" + ssidnew + "' placeholder='(ssid unset)'>";
+  message += "<input type='text' name='ssid' value='" + ssidNew + "' placeholder='(ssid unset)'>";
 
   message += "<h3>Enter Passkey:</h3>";
   message += "<input type='password' id='psk' name='psk' value='" + psknew + "' placeholder='(psk unset)'>";
@@ -235,20 +235,20 @@ void handleclose() {                       // Stops the Access Point mode and sw
   message += "</body>";
   message += "</html>";
 
-  httpServer.send(200, "text/html", message);
+  httpServerPort.send(200, "text/html", message);
 
   int i;
-  if (ServerIP != unset) {
+  if (serverIP != unset) {
     for (i = 0; i < 4; i++) {
-      EEPROMr.write(DATA_OFFSET + i, ServerIP[i]);
+      EEPROMr.write(DATA_OFFSET + i, serverIP[i]);
     }
     delay(100);
   }
 
-  if (ssidnew.length() != 0) {
+  if (ssidNew.length() != 0) {
     i = 0;
-    while (i < ssidnew.length()) {
-      EEPROMr.write(100 + i, ssidnew[i]);
+    while (i < ssidNew.length()) {
+      EEPROMr.write(100 + i, ssidNew[i]);
       i++;
       delay(100);
     }
@@ -275,7 +275,7 @@ void handleclose() {                       // Stops the Access Point mode and sw
 void readAll() {                           // Reads values for Variables from EEPROM
   int i, j;
   for (i = 0; i < 4; i++) {
-    ServerIP[i] = EEPROMr.read(DATA_OFFSET + i);
+    serverIP[i] = EEPROMr.read(DATA_OFFSET + i);
   }
   i = 0;
   j = 0;
@@ -291,7 +291,7 @@ void readAll() {                           // Reads values for Variables from EE
   }
   strvar[i] = '\0';
   if (i != 100) {
-    ssidnew = String(strvar);
+    ssidNew = String(strvar);
   }
 
   memset(strvar, '\0', sizeof(strvar));
@@ -313,7 +313,7 @@ void readAll() {                           // Reads values for Variables from EE
 
 void handleGetLockStatus() {               // Let the Website Autorenew the Lockstate || Wifi
   lockStatus = lockStatusBool ? "locked" : "unlocked";
-  httpServer.send(200, "text/plain", lockStatus);
+  httpServerPort.send(200, "text/plain", lockStatus);
 }
 
 void handleIPrenew () {                          // Loads new list of connected Clients || Wifi
@@ -324,8 +324,8 @@ void handleIPrenew () {                          // Loads new list of connected 
       clientnumber++;
     }
   }
-  httpServer.sendHeader("Location", "/", true);  // Redirect to root page
-  httpServer.send(303);                          // Send response with redirect
+  httpServerPort.sendHeader("Location", "/", true);  // Redirect to root page
+  httpServerPort.send(303);                          // Send response with redirect
 }
 
 void handleAP() {                           // Goes into Access Point mode || Wifi to AP
@@ -345,23 +345,23 @@ void handleAutoIPassign() {                 // Let the DHCP assign the IP-Addres
 
   WiFi.disconnect(true);
   delay(200);
-  WiFi.begin(ssidnew, psknew);
+  WiFi.begin(ssidNew, psknew);
 
   reconnect1(0);
 
-  ServerIP = WiFi.localIP();
+  serverIP = WiFi.localIP();
 
-  gateway = ServerIP;
+  gateway = serverIP;
   gateway[3] = 1;
 
   byte i;
   for  (i = 0; i < 4; i++) {
-    EEPROMr.write(DATA_OFFSET + i, ServerIP[i]);
+    EEPROMr.write(DATA_OFFSET + i, serverIP[i]);
   }
-  if (ssidnew.length() != 0) {
+  if (ssidNew.length() != 0) {
     i = 0;
-    while (i < ssidnew.length()) {
-      EEPROMr.write(100 + i, ssidnew[i]);
+    while (i < ssidNew.length()) {
+      EEPROMr.write(100 + i, ssidNew[i]);
       i++;
       delay(100);
     }
@@ -399,7 +399,7 @@ void APmode() {                             // Access Point mode
 
   bool angemeldet = true;
   while (srun) {
-    httpServer.handleClient();
+    httpServerPort.handleClient();
     if (WiFi.softAPgetStationNum() == 0 && angemeldet) {
       angemeldet = false;
       startTime = millis();                 // Sets start time
@@ -421,9 +421,9 @@ void APmode() {                             // Access Point mode
     delay(500);
 
     // New IP assurance
-    gateway = ServerIP;
+    gateway = serverIP;
     gateway[3] = 1;
-    if (ServerIP != unset && ServerIP != gateway) WiFi.config(ServerIP, gateway, subnet);
+    if (serverIP != unset && serverIP != gateway) WiFi.config(serverIP, gateway, subnet);
   }
   autoIPassignBool = false;
 }
@@ -439,7 +439,7 @@ void operatingProof() {                     // Check, if static IP is working wi
   }
 }
 
-void reconnect1(int s) {                    // If not reconnect, then go back in Access Point mode
+void reconnect1(byte s) {                    // If not reconnect, then go back in Access Point mode
   readAll();
   int i = 0;
   int minToAccessPointMode = 3;
@@ -463,7 +463,7 @@ void reconnect1(int s) {                    // If not reconnect, then go back in
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     debug(".");
-    if (i == (minToAccessPointMode * 60)) {  // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
+    if (i == (minToAccessPointMode * 60)) { // After 'minToAccessPointMode' minutes the ESP is set to Access Point mode
       display.clearDisplay();
       display.setCursor(0, 0);
       display.println("Connection failure");
@@ -473,18 +473,18 @@ void reconnect1(int s) {                    // If not reconnect, then go back in
     }
     i++;
   }
-  operatingProof();
+  //operatingProof();       ///Test
 }
 
 void tcpLoop() {
-  if (tcpServer.hasClient()) {              // Accept new clients
+  if (tcpServerPort.hasClient()) {              // Accept new clients
     for (byte i = 0; i < maxClientNumber; i++) {
       // Find a free slot
       if (!clients[i] || !clients[i].connected()) {
         if (clients[i]) {
           clients[i].stop();
         }
-        clients[i] = tcpServer.available();
+        clients[i] = tcpServerPort.available();
         debug("New client connected, ID: ");
         debugln(i);
         break;
@@ -571,10 +571,10 @@ void tcpLoop() {
     debugln("Error no clients connected");
   }
   currentMillis = millis();
-  if (LEDstatus == "high" && currentMillis - lastSetTime >= resetInterval) {  // LED auf off reseten
+  if (LEDstatus == "high" && currentMillis - lastSetHighTime >= resetInterval) {  // LED auf off reseten
     debugln("Send low to Clients");
     sendLedLowToClients();
-    lastSetTime = millis();
+    lastSetHighTime = millis();
   }
 }
 
@@ -588,7 +588,7 @@ void sendLedHighToClients() {               // Send "LED high" to all connected 
   waitingForResponse = true;
   lastSendTime = millis();
   expectedResponse = "LED is on";
-  lastSetTime = millis();
+  lastSetHighTime = millis();
 }
 
 void sendLedLowToClients() {                // Send "LED low" to all connected clients
@@ -674,29 +674,29 @@ void setup() {
   lockStatus = lockStatusBool ? "locked" : "unlocked";
 
   delay(500);
-  gateway = ServerIP;
+  gateway = serverIP;
   gateway[3] = 1;
-  if (ServerIP != unset && ServerIP != gateway) WiFi.config(ServerIP, gateway, subnet);
-  WiFi.begin(ssidnew, psknew);
+  if (serverIP != unset && serverIP != gateway) WiFi.config(serverIP, gateway, subnet);
+  WiFi.begin(ssidNew, psknew);
 
   // WiFi + AP mode
-  httpServer.on("/", handleRoot);
+  httpServerPort.on("/", handleRoot);
 
   // WiFi mode
-  httpServer.on("/iprenew", handleIPrenew);
-  httpServer.on("/getLockStatus", handleGetLockStatus);
-  httpServer.on("/ap", handleAP);
+  httpServerPort.on("/iprenew", handleIPrenew);
+  httpServerPort.on("/getLockStatus", handleGetLockStatus);
+  httpServerPort.on("/ap", handleAP);
 
   // AP mode
-  httpServer.on("/showPassword", handleShowPassword);
-  httpServer.on("/sub", handlesub);
-  httpServer.on("/close", handleclose);
-  httpServer.on("/autoIPassign", handleAutoIPassign);
-  httpServer.begin();
+  httpServerPort.on("/showPassword", handleShowPassword);
+  httpServerPort.on("/sub", handlesub);
+  httpServerPort.on("/close", handleclose);
+  httpServerPort.on("/autoIPassign", handleAutoIPassign);
+  httpServerPort.begin();
 
   reconnect1(0);
 
-  tcpServer.begin();                        // Starts the TCP server
+  tcpServerPort.begin();                        // Starts the TCP server
 
   debugln();
   debugln("WiFi connected and TCP-Server started");
@@ -711,7 +711,7 @@ void setup() {
 }
 
 void loop() {
-  httpServer.handleClient();
+  httpServerPort.handleClient();
 
   if (WiFi.status() != WL_CONNECTED) {      // Reconnect if connection is lost
     reconnect1(1);
