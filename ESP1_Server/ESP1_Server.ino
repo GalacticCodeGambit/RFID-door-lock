@@ -473,7 +473,7 @@ void reconnect1(byte s) {                    // If not reconnect, then go back i
     }
     i++;
   }
-  //operatingProof();       ///Test
+  operatingProof();
 }
 
 void tcpLoop() {
