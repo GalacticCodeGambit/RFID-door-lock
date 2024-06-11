@@ -2,8 +2,8 @@
 
 ## Items we used
 - 2x ESP8266 D1 mini pro
-- 2x OLED 0.66'' 64x48
 - RFID-RC522
+- 2x OLED 0.66'' 64x48
 - cables
 - LED
 - resistance
