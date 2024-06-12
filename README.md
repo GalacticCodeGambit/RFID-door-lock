@@ -1,4 +1,4 @@
-# RFID-door-lock
+# RFID door lock
 
 ## Description
 
