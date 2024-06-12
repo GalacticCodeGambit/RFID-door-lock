@@ -1,4 +1,4 @@
-# Tuerschloss-RFID
+# RFID-door-lock
 
 ## Items we used
 - 2x ESP8266 D1 mini pro
