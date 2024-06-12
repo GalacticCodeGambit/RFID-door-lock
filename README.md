@@ -14,7 +14,7 @@
 Ein 
 
 **Achtung:**
-Die Kommunikation zwischen den ESPs ist nicht verschlüsselt
+Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüsslung der RFID Karten ist nicht sicher. 
 
 ## Features 
 
