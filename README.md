@@ -56,3 +56,5 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 
 ## Contributing
 We welcome contributions from the community! If you have suggestions for improvements or new features, please open an issue or submit a pull request on our [GitHub repository](https://github.com/GalacticCodeGambit/RFID-door-lock).
+
+- Hilfreiches zur Daten Strucktur auf [RFID Karten](https://arduino-projekte.webnode.at/meine-projekte/zugangskontrolle-mit-rfid/tag-speicher-lesen/#:~:text=Die%2016-Byte%20gro%C3%9Fen%20Datenb%C3%B6cke,k%C3%B6nnen%20je%20einen%20Zahlenwert%20enthalten.)
