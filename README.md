@@ -1,6 +1,7 @@
 # RFID-door-lock
 
 ## Items we used
+
 - 2x ESP8266 D1 mini pro
 - RFID-RC522
 - 2x OLED 0.66'' 64x48
@@ -8,7 +9,20 @@
 - LED
 - resistance
 
+## Description
+
+Ein 
+
+**Achtung:**
+Die Kommunikation zwischen den ESPs ist nicht verschlüsselt
+
+## Features 
+
+- Scant RFID-Karten auf richtige Schlüssel Daten.
+- Mehrer Clients möglich 
+
 ## Funktionen
+
 Ein ESP8266(1) mit RFID-Reader und einem Display sowie zwei ESP(2) mit Display und einer LED.
 Der ESP(1) mit RFID-Reader liest den RFID-Chip und sendet den RFID-Code zum ESP(2), der
 entscheidet, ob dieser Code richtig definiert/eingespeichert ist oder nicht. Bei richtigem RFID-Code
@@ -17,11 +31,13 @@ symbolisiert die Entriegelung einer Tür/eines Türschlosses. Der entriegelte Zu
 kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt über WLAN.
 
 ### Soll Funktionen:
+
 - Auf dem Display wird der Verarbeitungszustand angezeigt (Chip gelesen, Chip überprüfen, …)
 - Der ESP(1) gibt eine Webseite aus, die den Zustand der Entriegelung angibt.
 - Kommunikation über TCP/IP Protokoll
 
 ### Optionale Funktionen:
+
 - WLAN-Konfiguration via Access-Point (Freischaltung durch Taster)
 - Die WLAN-Kommunikation verschlüsseln
 
@@ -29,10 +45,10 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 <img width="419" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
 
 ## Troubleshooting
-* **If the ESP1 automatically switches to access point mode after setting up the WLAN settings**
-  1. deactivate/comment out "operatingProof()" in the code
-* **If the ESP1 issues the message "Error no clients connected"**
-  1. restart clients
+- **The ESP1 automatically switches to access point mode after setting up the WLAN settings**
+  1. Deactivate/comment out "operatingProof()" in the code.
+- **The ESP1 issues the message "Error no clients connected"**
+  1. Restart clients.
    
 
 ## Contributing
