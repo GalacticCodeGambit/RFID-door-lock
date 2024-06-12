@@ -28,8 +28,12 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 ## Connection Diagram
 <img width="419" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
 
-## Known problems
-- If the ESP1 automatically switches to access point mode after setting up the WLAN settings, deactivate/comment out "operatingProof()" in the code
-- If the ESP1 issues the message "Error no clients connected", restart clients
+## Troubleshooting
+* **If the ESP1 automatically switches to access point mode after setting up the WLAN settings**
+  1. deactivate/comment out "operatingProof()" in the code
+* **If the ESP1 issues the message "Error no clients connected"**
+  1. restart clients
    
 
+## Contributing
+We welcome contributions from the community! If you have suggestions for improvements or new features, please open an issue or submit a pull request on our [GitHub repository](https://github.com/GalacticCodeGambit/RFID-door-lock).
