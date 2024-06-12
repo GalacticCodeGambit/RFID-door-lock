@@ -18,8 +18,10 @@ Die Kommunikation zwischen den ESPs ist nicht verschlüsselt
 
 ## Features 
 
+- ESPs werden über Access Point Modus eingerichtet.
 - Scant RFID-Karten auf richtige Schlüssel Daten.
-- Mehrer Clients möglich 
+- Mehrere Clients möglich.
+- 
 
 ## Funktionen
 
