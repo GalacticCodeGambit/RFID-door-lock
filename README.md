@@ -1,14 +1,5 @@
 # RFID-door-lock
 
-## Items we used
-
-- 2x ESP8266 D1 mini pro
-- RFID-RC522
-- 2x OLED 0.66'' 64x48
-- cables
-- LED
-- resistance
-
 ## Description
 
 Ein 
@@ -18,10 +9,11 @@ Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüss
 
 ## Features 
 
-- ESPs werden über Access Point Modus eingerichtet.
+- **Access Point Modus:** Netzwerk einstellung werden über AP Modus eingerichtet.
 - Scant RFID-Karten auf richtige Schlüssel Daten.
 - Mehrere Clients möglich.
-- 
+- **ESP1 Websaite:** zeigt den Status der LED an.
+- **Displays:** zeigen den Status des ESP und der LED an. 
 
 ## Funktionen
 
@@ -42,6 +34,15 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 
 - WLAN-Konfiguration via Access-Point (Freischaltung durch Taster)
 - Die WLAN-Kommunikation verschlüsseln
+
+## Items we used
+
+- 2x ESP8266 D1 mini pro
+- RFID-RC522
+- 2x OLED 0.66'' 64x48
+- cables
+- LED
+- resistance
 
 ## Connection Diagram
 <img width="419" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
