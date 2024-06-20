@@ -5,7 +5,7 @@
 Ein 
 
 **Achtung:**
-Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüsslung der RFID Karten ist nicht sicher.
+Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüsslung der RFID Karten ist nicht mehr sicher.
 
 Eine sichere alternative für eine two way communication zwischen den ESPs wäre zum Beispiel [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-)
 
