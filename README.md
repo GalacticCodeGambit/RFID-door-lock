@@ -38,6 +38,7 @@ ESP1 uses an RFID-Reader to scan the RFID card for the correct key data, if this
 ### Working library versions
 - EEPROM-Rotate 0.9.2
 - MFRC522 1.4.11
+- Adafruit GFX Library 1.11.9
 - Adafruit SSD1306 Wemos Mini OLED 1.1.2
 - WiFi 1.2.7
    
