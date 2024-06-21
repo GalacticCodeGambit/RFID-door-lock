@@ -2,20 +2,19 @@
 
 
 ## Description
-ESP1 scannt mit einem RFID-Reader die RFID-Karte auf die richtigen Schlüsseldaten, wenn das der Fall ist, sendet er an die ESP2s(Clients) das sie die LED auf high stellen sollen, wenn sie antworten, dass sie das gemacht haben, ändert der ESP1 auf der Webseite und dem Display auf entriegelt. Nach 5 Sekunden sendet der ESP1 den Clients, dass sie die LED auf low stellen sollen, wenn sie antworten, ändert sich der Status auf dem Display und der Websaite.  
+ESP1 uses an RFID-Reader to scan the RFID card for the correct key data, if this is the case, it sends to the ESP2s (clients) that they should set the LED to high, if they respond that they have done this, changes the ESP1 on the website and the display is unlocked. After 5 seconds the ESP1 sends the clients to set the LED to low, if they respond the status on the display and the web page changes.  
 
-**Achtung:** Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die Verschlüsselung der RFID-Karten ist nicht mehr sicher.
-
-Eine sichere Alternative für eine two way communication zwischen den ESPs wäre zum Beispiel [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-)
+**Attention:** The communication between the ESPs is not encrypted and the encryption of the RFID cards is no longer secure. <br/>
+A safe alternative for a two-way communication between the ESPs would be, for example [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-).
 
 
 ## Features 
-- **Access Point Modus:** Netzwerkeinstellungen werden über AP-Modus eingerichtet.
-- Scannt RFID-Karten auf richtige Schlüsseldaten.
-- Mehrere Clients möglich.
-- **Websaite:** ESP1 zeigt den Status des Schlosses auf einer Websaite an.
-- **Displays:** zeigen den Status des ESP und des Schlosses an.
-- **Kommunikation:** ist über TCP/IP. 
+- **Access Point Mode:** Network settings are set up via AP mode.
+- Scans RFID cards for correct key data.
+- Multiple clients possible.
+- **Webstring:** ESP1 displays the status of the lock on a webstring.
+- **Displays:** show the status of the ESP and the lock.
+- **Communication:** is via TCP/IP in your WiFi network.
 
 
 ## Items we used
