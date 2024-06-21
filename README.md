@@ -4,8 +4,7 @@
 ## Description
 ESP1 uses an RFID-Reader to scan the RFID card for the correct key data, if this is the case, it sends to the ESP2s (clients) that they should set the LED to high, if they respond that they have done this, changes the ESP1 on the website and the display is unlocked. After 5 seconds the ESP1 sends the clients to set the LED to low, if they respond the status on the display and the web page changes.  
 
-**Attention:** The communication between the ESPs is not encrypted and the encryption of the RFID cards is no longer secure. <br/>
-A safe alternative for a two-way communication between the ESPs would be, for example [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-).
+**Attention:** The communication between the ESPs is not encrypted and the encryption of the RFID cards is no longer secure. <br/> A safe alternative for a two-way communication between the ESPs would be, for example [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-).
 
 
 ## Features 
