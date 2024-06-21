@@ -2,21 +2,20 @@
 
 
 ## Description
-ESP1 Scant mit einem RFID-Scaner die RFID-Karte auf die Richtige Schlüssel Daten, wenn das der Fall ist, Sendet er an die ESP2s(Clients) das sie die LED auf HIGH stellen sollen, wenn sie antworten das sie das gemacht haben ändert der ESP1 auf der Webseite und dem Display auf entriegelt. 
-Nach 5 Sekunden Sender der ESP1 den Clients das sie die LED auf low stellen sollen, wenn sie antworten ändert sich der status auf den Display und der Websaite.  
+ESP1 scannt mit einem RFID-Scanner die RFID-Karte auf die richtigen Schlüsseldaten, wenn das der Fall ist, sendet er an die ESP2s(Clients) das sie die LED auf high stellen sollen, wenn sie antworten, dass sie das gemacht haben, ändert der ESP1 auf der Webseite und dem Display auf entriegelt. Nach 5 Sekunden sendet der ESP1 den Clients, dass sie die LED auf low stellen sollen, wenn sie antworten, ändert sich der Status auf dem Display und der Websaite.  
 
-**Achtung:** Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüsslung der RFID Karten ist nicht mehr sicher.
+**Achtung:** Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die Verschlüsselung der RFID-Karten ist nicht mehr sicher.
 
-Eine sichere alternative für eine two way communication zwischen den ESPs wäre zum Beispiel [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-)
+Eine sichere Alternative für eine two way communication zwischen den ESPs wäre zum Beispiel [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-)
 
 
 ## Features 
-- **Access Point Modus:** Netzwerk einstellung werden über AP Modus eingerichtet.
-- Scant RFID-Karten auf richtige Schlüssel Daten.
+- **Access Point Modus:** Netzwerkeinstellungen werden über AP-Modus eingerichtet.
+- Scannt RFID-Karten auf richtige Schlüsseldaten.
 - Mehrere Clients möglich.
 - **Websaite:** ESP1 zeigt den Status des Schlosses auf einer Websaite an.
 - **Displays:** zeigen den Status des ESP und des Schlosses an.
-- **Komunikation:** ist über TCP/IP. 
+- **Kommunikation:** ist über TCP/IP. 
 
 
 ## Items we used
