@@ -62,9 +62,9 @@ bool wifiBool = true;
 bool autoIPassignBool = false;
 
 // TCP/IP
-WiFiServer tcpServerPort(40);                  // TCP/IP Server Port
+WiFiServer tcpServerPort(40);              // TCP/IP Server Port
 int clientnumber;
-const byte maxClientNumber = 5;
+const byte maxClientNumber = 5;            // Maximum possible connected clients to server    
 IPAddress clientIP[maxClientNumber];
 WiFiClient clients[maxClientNumber];
 bool lockStatusBool = true;
@@ -74,7 +74,7 @@ String LEDstatus = "low";                  // Current status of LED
 
 unsigned long currentMillis = 0;
 unsigned long lastSetHighTime = 0;
-const unsigned long resetInterval = 5000;
+const unsigned long resetInterval = 5000;  // Interval for sending LED low after LED has been set to high
 
 unsigned long lastSendTime = 0;
 const unsigned long resendInterval = 3000; // Interval for resending message
