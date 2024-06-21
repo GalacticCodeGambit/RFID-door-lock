@@ -35,6 +35,11 @@ ESP1 uses an RFID-Reader to scan the RFID card for the correct key data, if this
   1. Deactivate/comment out "operatingProof()" in the code.
 - **The ESP1 issues the message "Error no clients connected"**
   1. Restart clients.
+### Working library versions
+- EEPROM-Rotate 0.9.2
+- MFRC522 1.4.11
+- Adafruit SSD1306 Wemos Mini OLED 1.1.2
+- WiFi 1.2.7
    
 
 ## Contributing
