@@ -2,7 +2,7 @@
 
 
 ## Description
-ESP1 scannt mit einem RFID-Scanner die RFID-Karte auf die richtigen Schlüsseldaten, wenn das der Fall ist, sendet er an die ESP2s(Clients) das sie die LED auf high stellen sollen, wenn sie antworten, dass sie das gemacht haben, ändert der ESP1 auf der Webseite und dem Display auf entriegelt. Nach 5 Sekunden sendet der ESP1 den Clients, dass sie die LED auf low stellen sollen, wenn sie antworten, ändert sich der Status auf dem Display und der Websaite.  
+ESP1 scannt mit einem RFID-Reader die RFID-Karte auf die richtigen Schlüsseldaten, wenn das der Fall ist, sendet er an die ESP2s(Clients) das sie die LED auf high stellen sollen, wenn sie antworten, dass sie das gemacht haben, ändert der ESP1 auf der Webseite und dem Display auf entriegelt. Nach 5 Sekunden sendet der ESP1 den Clients, dass sie die LED auf low stellen sollen, wenn sie antworten, ändert sich der Status auf dem Display und der Websaite.  
 
 **Achtung:** Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die Verschlüsselung der RFID-Karten ist nicht mehr sicher.
 
