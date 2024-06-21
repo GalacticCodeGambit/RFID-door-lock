@@ -27,6 +27,7 @@ ESP1 uses an RFID-Reader to scan the RFID card for the correct key data, if this
 
 ## Connection Diagram
 <img width="419" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
+<img width="419" src="https://github.com/GalacticCodeGambit/RFID-door-lock/assets/150372421/c330ce8e-0be8-4b24-92a6-b4a76b7c442a">
 
 
 ## Troubleshooting
