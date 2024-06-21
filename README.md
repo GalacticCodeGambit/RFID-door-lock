@@ -1,43 +1,25 @@
 # RFID door lock
 
+
 ## Description
+ESP1 Scant mit einem RFID-Scaner die RFID-Karte auf die Richtige Schlüssel Daten, wenn das der Fall ist, Sendet er an die ESP2s(Clients) das sie die LED auf HIGH stellen sollen, wenn sie antworten das sie das gemacht haben ändert der ESP1 auf der Webseite und dem Display auf entriegelt. 
+Nach 5 Sekunden Sender der ESP1 den Clients das sie die LED auf low stellen sollen, wenn sie antworten ändert sich der status auf den Display und der Websaite.  
 
-Ein 
-
-**Achtung:**
-Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüsslung der RFID Karten ist nicht mehr sicher.
+**Achtung:** Die Kommunikation zwischen den ESPs ist nicht verschlüsselt und die verschlüsslung der RFID Karten ist nicht mehr sicher.
 
 Eine sichere alternative für eine two way communication zwischen den ESPs wäre zum Beispiel [ESP-NOW](https://www.electronicwings.com/nodemcu/esp-now-two-way-communication-for-esp8266-nodemcu-)
 
-## Features 
 
+## Features 
 - **Access Point Modus:** Netzwerk einstellung werden über AP Modus eingerichtet.
 - Scant RFID-Karten auf richtige Schlüssel Daten.
 - Mehrere Clients möglich.
-- **ESP1 Websaite:** zeigt den Status der LED an.
-- **Displays:** zeigen den Status des ESP und der LED an. 
+- **Websaite:** ESP1 zeigt den Status des Schlosses auf einer Websaite an.
+- **Displays:** zeigen den Status des ESP und des Schlosses an.
+- **Komunikation:** ist über TCP/IP. 
 
-<!--
-## Funktionen
-Ein ESP8266(1) mit RFID-Reader und einem Display sowie zwei ESP(2) mit Display und einer LED.
-Der ESP(1) mit RFID-Reader liest den RFID-Chip und sendet den RFID-Code zum ESP(2), der
-entscheidet, ob dieser Code richtig definiert/eingespeichert ist oder nicht. Bei richtigem RFID-Code
-wird auf beiden Displays "Entriegelt" angezeigt und die LED (ESP(2)) wird eingeschaltet. Die LED
-symbolisiert die Entriegelung einer Tür/eines Türschlosses. Der entriegelte Zustand bleibt für einen
-kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt über WLAN.
-
-### Soll Funktionen:
-- Auf dem Display wird der Verarbeitungszustand angezeigt (Chip gelesen, Chip überprüfen, …)
-- Der ESP(1) gibt eine Webseite aus, die den Zustand der Entriegelung angibt.
-- Kommunikation über TCP/IP Protokoll
-
-### Optionale Funktionen:
-- WLAN-Konfiguration via Access-Point (Freischaltung durch Taster)
-- Die WLAN-Kommunikation verschlüsseln
--->
 
 ## Items we used
-
 - 2x ESP8266 D1 mini pro
 - RFID-RC522
 - 2x OLED 0.66'' 64x48
@@ -45,8 +27,10 @@ kurzen Zeitraum (5s) erhalten. Die Verbindung zwischen ESP(1) und ESP(2) erfolgt
 - LED
 - resistance
 
+
 ## Connection Diagram
 <img width="419" src="https://github.com/GalacticCodeGambit/Tuerschloss-RFID/assets/150372421/607786e3-a26c-4ede-8bcb-3764e9ef0c5a">
+
 
 ## Troubleshooting
 - **The ESP1 automatically switches to access point mode after setting up the WLAN settings**
